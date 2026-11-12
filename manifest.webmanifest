@@ -1,0 +1,19 @@
+{
+  "name": "less. – Raum für Veränderung",
+  "short_name": "less.",
+  "description": "Weniger von dem, was du nicht mehr willst.",
+  "lang": "de-DE",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090b12",
+  "theme_color": "#0b0b13",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
