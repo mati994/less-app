@@ -20,8 +20,7 @@ export function animateRingSvgProgress(root,from,to,pulse){
       const fromValue=Number.isFinite(from)?from:to;
       const toValue=Number.isFinite(to)?to:fromValue;
       if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){paint(toValue);return}
-      if(Math.abs(fromValue-toValue)<.001){paint(toValue);pulseStage();return}
-      paint(fromValue);
+      // Den sanften Lichtimpuls sofort beim Speichern starten, nicht erst nach dem Zahlenlauf.\n      pulseStage();\n      if(Math.abs(fromValue-toValue)<.001){paint(toValue);return}\n      paint(fromValue);
       const begin=performance.now(),duration=1040;
       function frame(now){
         // Guard against navigation and replacing the ring during the animation.
@@ -29,7 +28,7 @@ export function animateRingSvgProgress(root,from,to,pulse){
         const t=Math.max(0,Math.min(1,(now-begin)/duration)),ease=1-Math.pow(1-t,3);
         paint(fromValue+(toValue-fromValue)*ease);
         if(t<1)requestAnimationFrame(frame);
-        else pulseStage();
+        else paint(toValue);
       }
       requestAnimationFrame(frame);
     }
@@ -126,7 +125,7 @@ export function finishIntroAnimation({splash,appShell,root,metrics,reduceMotion}
     });
     const length=interpolate(previousLength,nextLength);
     const rotation=interpolate(-60,-98);
-    const strokeWidth=interpolate(28,8.2);
+    const strokeWidth=interpolate(28,14.5);
     arc.setAttribute('stroke-dasharray',length.toFixed(2)+' '+full.toFixed(2));
     arc.setAttribute('transform','rotate('+rotation.toFixed(3)+' 200 200)');
     arc.style.strokeWidth=strokeWidth.toFixed(2)+'px';
