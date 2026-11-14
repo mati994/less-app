@@ -3,6 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script>
+    // Der Splash startet nach einem Reload immer bei der oberen Ausgangsposition.
+    // Danach ist normales Scrollen weiterhin moeglich.
+    if ('scrollRestoration' in history) history.scrollRestoration='manual';
+    window.scrollTo(0,0);
+    window.addEventListener('pageshow',()=>{
+      if(document.getElementById('splash'))window.scrollTo(0,0);
+    });
+  </script>
   <meta name="theme-color" content="#0b0b13">
   <meta name="description" content="less. – Weniger von dem, was du nicht mehr willst. Ein bewusster Fortschrittstracker.">
   <title>less. — Testversion</title>

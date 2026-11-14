@@ -1,6 +1,6 @@
 /* Offline-Cache nur für diese Vorschau; den Live-Cache nie löschen. */
 const PREFIX='less-preview-';
-const CACHE_NAME=PREFIX+'2026-11-14-v1';
+const CACHE_NAME=PREFIX+'2026-11-14-v2';
 const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./preview.css","./styles/base.css","./styles/layout.css","./styles/ring.css","./src/config.js","./src/storage.js","./src/ring.js","./src/views.js","./src/app.js","./src/register-sw.js"];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
