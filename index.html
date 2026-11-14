@@ -39,6 +39,21 @@
     .onboarding{padding-top:54px}.onboarding .brand{margin-bottom:65px}.onboarding h1{font-size:49px;letter-spacing:-.068em;line-height:1.02;font-weight:600;max-width:330px;margin:12px 0 13px}.onboarding p{color:#aaa5b4;line-height:1.72;font-size:13px;margin:0 0 30px}.field{display:block;font-size:11px;color:#aaa5b4;margin-bottom:8px;letter-spacing:.05em}.field-input{width:100%;min-height:55px;padding:15px 16px;margin-bottom:23px;border-radius:15px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#f1edf6;font-size:15px}.field-input::placeholder{color:#696879}.mode-group{display:flex;gap:8px;margin:5px 0 21px}.mode-option{flex:1;padding:14px 12px;border-radius:13px;border:1px solid rgba(255,255,255,.12);color:#aaa4b5;background:rgba(255,255,255,.035);font-size:12px}.mode-option.selected{color:#f3e7fa;border-color:rgba(198,164,239,.65);background:rgba(181,146,219,.14)}.helper{color:#77768a!important;font-size:11px!important;margin:0 0 20px!important}.onboarding .primary-button{margin-top:12px}.back-link{border:0;background:transparent;color:#aea7bc;font-size:12px;margin:22px auto 0;display:block}
     .toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:#272332;border:1px solid rgba(255,255,255,.17);border-radius:14px;padding:12px 18px;color:#e8e2ed;font-size:12px;z-index:40;box-shadow:0 12px 38px rgba(0,0,0,.4);animation:fade .2s ease both;white-space:nowrap}
     .splash{position:fixed;inset:0;background:radial-gradient(ellipse 65% 45% at 50% 46%,rgba(95,72,138,.2),transparent 76%),#090b13;z-index:99;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity .65s ease,visibility .65s}.splash.out{opacity:0;visibility:hidden}.splash-logo{display:flex;align-items:center;gap:14px;font-size:65px;letter-spacing:-.095em;font-weight:650;animation:splashIn .8s var(--ease) both}.splash-logo svg{width:55px;height:55px;animation:spinIn 1.4s var(--ease) both}.splash-tag{color:#9890a7;font-size:11px;letter-spacing:.23em;text-transform:uppercase;animation:fade 1s .3s both}@keyframes splashIn{from{opacity:0;filter:blur(10px);transform:scale(.92)}to{opacity:1;filter:blur(0);transform:scale(1)}}@keyframes spinIn{from{transform:rotate(-130deg);opacity:0}to{transform:rotate(0);opacity:1}}@keyframes fade{from{opacity:0}to{opacity:1}}@keyframes rise{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+    /* less. v0.2: open arc, optically centered metric and connected splash transition */
+    .app.booting{opacity:0}
+    .app.entering{opacity:1;transition:opacity .58s ease}
+    .app.morphing .orbit{opacity:0}
+    .orbit{transition:opacity .2s ease}
+    .orbit .back{opacity:0}
+    .orbit .front{stroke-dashoffset:0;transition:stroke-dasharray .95s var(--ease)}
+    .hero-metric{position:absolute;inset:0;z-index:1;margin:0;pointer-events:none}
+    .metric-number{position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);font-size:clamp(68px,20vw,86px);line-height:1;font-weight:570;white-space:nowrap}
+    .hero-caption{position:absolute;left:0;right:0;top:calc(50% + 57px);text-align:center}
+    .hero-caption .metric-label{margin:0;font-size:12px}
+    .hero-caption .metric-note{margin-top:7px;font-size:10px}
+    .splash-word,.splash-tag{transition:opacity .25s ease,transform .35s var(--ease)}
+    .splash.traveling .splash-word,.splash.traveling .splash-tag{opacity:0;transform:translateY(-7px)}
+    .travel-ring{position:fixed;z-index:100;pointer-events:none;filter:drop-shadow(0 0 12px rgba(198,162,238,.27));will-change:left,top,width,height}
     @media(min-width:620px){body{padding:42px 0 55px}.app{min-height:840px;border:1px solid rgba(255,255,255,.09);border-radius:38px;box-shadow:0 28px 110px rgba(0,0,0,.46)}.screen{min-height:830px}.desktop-caption{display:block;text-align:center;color:#6f7082;font-size:11px;letter-spacing:.09em;margin:18px auto;max-width:430px}.overlay{align-items:center}.sheet{border-bottom:1px solid rgba(255,255,255,.13);border-radius:28px;padding-bottom:35px;max-height:90dvh}}
     @media(max-width:375px){.screen{padding-left:21px;padding-right:21px}.habit-title{font-size:40px}.focus{margin-top:29px}.hero{min-height:260px}.orbit{width:242px;height:242px}.halo{width:245px;height:245px}.stat{padding:13px}.stat-value{font-size:25px}.check-container{margin-top:18px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
@@ -46,10 +61,10 @@
 </head>
 <body>
   <div id="splash" class="splash" aria-label="less. startet">
-    <div class="splash-logo"><svg viewBox="0 0 64 64" fill="none"><defs><linearGradient id="logo-gradient" x1="0" y1="0" x2="64" y2="64"><stop stop-color="#e9c8c5"/><stop offset="1" stop-color="#ab9adf"/></linearGradient></defs><circle cx="32" cy="32" r="23" stroke="url(#logo-gradient)" stroke-width="5" stroke-linecap="round" stroke-dasharray="107 38" transform="rotate(-60 32 32)"/></svg>less.</div>
+    <div class="splash-logo"><svg viewBox="0 0 64 64" fill="none"><defs><linearGradient id="logo-gradient" x1="0" y1="0" x2="64" y2="64"><stop stop-color="#e9c8c5"/><stop offset="1" stop-color="#ab9adf"/></linearGradient></defs><circle cx="32" cy="32" r="23" stroke="url(#logo-gradient)" stroke-width="5" stroke-linecap="round" stroke-dasharray="107 38" transform="rotate(-60 32 32)"/></svg><span class="splash-word">less.</span></div>
     <span class="splash-tag">Make room for better</span>
   </div>
-  <main class="app" id="app" aria-live="polite"></main>
+  <main class="app booting morphing" id="app" aria-live="polite"></main>
   <div class="desktop-caption">less. · Interaktives Designkonzept · Version 0.1</div>
   <div id="modal-root"></div>
   <script>
@@ -80,9 +95,9 @@
     function logo(){return `<div class="brand"><svg class="brandmark" viewBox="0 0 36 36" fill="none"><defs><linearGradient id="markgrad" x1="0" y1="0" x2="36" y2="36"><stop stop-color="#e8cfca"/><stop offset="1" stop-color="#aa90dd"/></linearGradient></defs><circle cx="18" cy="18" r="13" stroke="url(#markgrad)" stroke-width="3.2" stroke-dasharray="63 19" transform="rotate(-65 18 18)"/></svg>less.</div>`}
     function header(){return `<header class="brandrow">${logo()}<button class="iconbutton" aria-label="Einstellungen" data-tab="more">${icons.settings}</button></header>`}
     function bottom(){return `<nav class="bottom-nav" aria-label="Hauptnavigation">${[['home','Heute',icons.home],['history','Verlauf',icons.calendar],['more','Mehr',icons.more]].map(([name,title,icon])=>`<button class="tab ${name===tab?'active':''}" data-tab="${name}" aria-label="${title}" aria-current="${name===tab?'page':'false'}">${icon}<span>${title}</span><i class="dot"></i></button>`).join('')}</nav>`}
-    function home(){const m=metrics(),todayVal=data.checkins[dateKey(new Date())],ratio=m.pct===null?0:m.pct,offset=660*(1-ratio/100),fmtDate=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(new Date()),done=!!todayVal;
+    function home(){const m=metrics(),todayVal=data.checkins[dateKey(new Date())],ratio=m.pct===null?0:m.pct,openness=.24+.42*(1-Math.exp(-m.yes/45)),ringTotal=(2*Math.PI*105).toFixed(2),arc=(2*Math.PI*105*(1-openness)).toFixed(2),fmtDate=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(new Date()),done=!!todayVal;
       return `<section class="screen">${header()}<div class="header-date">${safeText(fmtDate)}</div><div class="focus"><div class="eyebrow">Dein Fokus</div><h1 class="habit-title">${safeText(data.habit)}</h1><p class="habit-sub">${safeText(data.goal||'Ein Tag nach dem anderen. In deinem Tempo.')}</p>${data.isDemo?'<span class="demo-badge">✳ DEMO · Zum Ausprobieren</span>':''}</div>
-      <div class="hero" aria-label="${m.yes} erfolgreiche Tage"><div class="halo"></div><svg class="orbit" viewBox="0 0 260 260" fill="none" aria-hidden="true"><defs><linearGradient id="progressGradient" x1="8" y1="0" x2="225" y2="260"><stop stop-color="#ffddd2"/><stop offset=".52" stop-color="#cda9e4"/><stop offset="1" stop-color="#8d99d4"/></linearGradient></defs><circle class="back" cx="130" cy="130" r="105"/><circle class="front" cx="130" cy="130" r="105" style="stroke-dashoffset:${offset}"/></svg><div class="hero-metric"><div class="metric-number">${m.yes}</div><div class="metric-label">bewusst gewonnene Tage</div><div class="metric-note">Jeder einzelne zählt.</div></div></div>
+      <div class="hero" aria-label="${m.yes} erfolgreiche Tage"><div class="halo"></div><svg class="orbit" viewBox="0 0 260 260" fill="none" aria-hidden="true"><defs><linearGradient id="progressGradient" x1="8" y1="0" x2="225" y2="260"><stop stop-color="#ffddd2"/><stop offset=".52" stop-color="#cda9e4"/><stop offset="1" stop-color="#8d99d4"/></linearGradient></defs><circle class="back" cx="130" cy="130" r="105"/><circle class="front" cx="130" cy="130" r="105" data-arc="${arc}" style="stroke-dasharray:${arc} ${ringTotal};stroke-dashoffset:0"/></svg><div class="hero-metric"><div class="metric-number">${m.yes}</div><div class="hero-caption"><div class="metric-label">bewusst gewonnene Tage</div><div class="metric-note">Jeder einzelne zählt.</div></div></div></div>
       <div class="stats"><div class="stat"><div class="stat-top">Deine aktuelle Serie</div><div class="stat-value">${m.streak}<span>Tage</span><span class="stat-icon">${icons.sparkle}</span></div><div class="stat-graphic"><i style="width:${Math.min(m.streak/30,1)*100}%"></i></div></div><div class="stat"><div class="stat-top">Letzte 30 Tage</div><div class="stat-value">${m.pct===null?'–':`${m.pct} %`}</div><div class="stat-graphic"><i style="width:${ratio}%"></i></div></div></div>
       <section class="check-container"><div class="today-label"><span>Dein täglicher Moment</span><strong>${done?(todayVal==='yes'?'HEUTE ERREICHT':'HEUTE EINGETRAGEN'):'NOCH OFFEN'}</strong></div><button class="primary-button" data-check="today"><span>${done?'Check-in bearbeiten':'Check-in für heute'}</span>${done?icons.check:icons.arrow}</button></section><div class="mini-footer"><span class="footer-copy">Fortschritt ist nicht immer geradlinig.</span><button class="text-button" data-tab="history">Verlauf ansehen ↗</button></div>${bottom()}</section>`}
     function history(){const m=metrics(),days=[],start=shifted(-29);for(let i=0;i<30;i++){const d=new Date(start);d.setDate(start.getDate()+i);days.push(d)}const leading=(start.getDay()+6)%7;let cal=weekdayShort.map(x=>`<div class="cal-day">${x}</div>`).join('');for(let i=0;i<leading;i++)cal+='<div></div>';
@@ -91,7 +106,18 @@
     function more(){return `<section class="screen">${header()}<h1 class="page-heading">Dein Raum.</h1><p class="page-intro">So viel wie nötig. So wenig wie möglich. Du bestimmst, wie du less. nutzt.</p><button class="settings-action" data-action="new"><span>Eigene Gewohnheit festlegen<small>Ein neues Ziel statt der Demo beginnen.</small></span>${icons.arrow}</button><button class="settings-action" data-action="demo"><span>Demo zurücksetzen<small>28 Beispieltage und die Startansicht laden.</small></span>${icons.arrow}</button><button class="settings-action" data-action="export"><span>Einträge exportieren<small>Deine Daten als JSON-Datei sichern.</small></span>${icons.arrow}</button><button class="settings-action" data-action="erase"><span>Einträge löschen<small>Alle lokalen Einträge entfernen.</small></span>${icons.arrow}</button><div class="notice" style="margin-top:18px">Deine Einträge bleiben in diesem Browser gespeichert. Es gibt keinen Account und keine Datenübertragung an einen Server. Benachrichtigungen sind für eine spätere Version vorgesehen.</div><div style="flex:1"></div>${bottom()}</section>`}
     let formMode='abstain';
     function setup(){tab='setup';root.innerHTML=`<section class="screen onboarding">${logo()}<div class="eyebrow">Ein Anfang genügt</div><h1>Was möchtest du loslassen?</h1><p>Eine Gewohnheit. Ein klarer Fokus. Du musst nicht alles auf einmal verändern.</p><form id="habit-form"><label for="habit-name" class="field">DEIN FOKUS</label><input id="habit-name" class="field-input" maxlength="48" required placeholder="z. B. Nicht mehr rauchen" autocomplete="off"><label class="field">DEIN WEG</label><div class="mode-group"><button type="button" class="mode-option selected" data-mode="abstain">Ganz verzichten</button><button type="button" class="mode-option" data-mode="reduce">Bewusst reduzieren</button></div><label for="habit-goal" class="field">DEIN ZIEL (OPTIONAL)</label><input id="habit-goal" class="field-input" maxlength="100" placeholder="z. B. Jeden Tag ohne Zigarette" autocomplete="off"><p class="helper">Einmal täglich hältst du fest, ob du dein Ziel erreicht hast. Keine Stimmungstests, kein Urteil.</p><button type="submit" class="primary-button"><span>Meinen Weg beginnen</span>${icons.arrow}</button></form><button class="back-link" data-action="back">Zurück zur Ansicht</button></section>`}
-    function render(){if(tab==='setup'){setup();return}root.innerHTML=tab==='history'?history():tab==='more'?more():home();window.scrollTo({top:0,behavior:'instant'})}
+    function render(){
+      const previousArc=root.querySelector('.orbit .front')?.getAttribute('data-arc');
+      if(tab==='setup'){setup();return}
+      root.innerHTML=tab==='history'?history():tab==='more'?more():home();
+      const newArc=root.querySelector('.orbit .front');
+      const currentArc=newArc?.getAttribute('data-arc');
+      if(previousArc&&currentArc&&previousArc!==currentArc&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        const c=(2*Math.PI*105).toFixed(2);
+        newArc.animate([{strokeDasharray:previousArc+' '+c},{strokeDasharray:currentArc+' '+c}],{duration:1050,easing:'cubic-bezier(.2,.8,.2,1)'});
+      }
+      window.scrollTo({top:0,behavior:'instant'});
+    }
     function sheet(content){modalRoot.innerHTML=`<div class="overlay" id="sheet-overlay"><div class="sheet" role="dialog" aria-modal="true" aria-label="Check-in"><div class="handle"></div><button class="sheet-close" aria-label="Schließen" data-action="close">×</button>${content}</div></div>`;modal='open'}
     function closeSheet(){modalRoot.innerHTML='';modal=null;pendingDate=null}
     function checkin(date){pendingDate=date;const d=new Date(`${date}T12:00:00`),dateLabel=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(d),current=data.checkins[date];const phrase=data.mode==='abstain'?'Heute darauf verzichtet':'Heute mein Ziel erreicht';sheet(`<div class="eyebrow" style="margin-top:42px">Ein bewusster Moment</div><h2>Wie lief dein Tag?</h2><p>${safeText(dateLabel)} · Ein ehrlicher Check-in reicht. Ohne weitere Fragen.</p><button class="choice" data-result="yes"><span class="choiceicon">${icons.check}</span><span><strong>${phrase}</strong><small>Du bist deinem Vorhaben treu geblieben.</small></span></button><button class="choice" data-result="no"><span class="choiceicon">${icons.close}</span><span><strong>Heute nicht erreicht</strong><small>Das ist ein Tag, nicht deine ganze Geschichte.</small></span></button>${current?'<button class="neutral-link" data-result="clear">Eintrag für diesen Tag entfernen</button>':'<button class="neutral-link" data-action="close">Später eintragen</button>'}`)}
@@ -108,7 +134,51 @@
     });
     document.addEventListener('submit',e=>{if(e.target.id!=='habit-form')return;e.preventDefault();const habit=document.getElementById('habit-name').value.trim(),goal=document.getElementById('habit-goal').value.trim();if(!habit)return;const hadRecords=Object.keys(data.checkins).length;if(hadRecords&&!confirm('Damit beginnt ein neues Ziel. Die bisherigen Einträge werden ersetzt. Weiter?'))return;data={isDemo:false,habit,goal,mode:formMode,created:dateKey(new Date()),checkins:{}};save();tab='home';render();toast('Dein neues Ziel ist bereit')});
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
-    save();render();const splash=document.getElementById('splash');setTimeout(()=>{splash.classList.add('out');setTimeout(()=>splash.remove(),700)},window.matchMedia('(prefers-reduced-motion: reduce)').matches?150:1400);
+    save();render();
+    const splash=document.getElementById('splash'),appShell=document.getElementById('app');
+    const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function finishIntro(){
+      const source=splash?.querySelector('.splash-logo svg');
+      const target=root.querySelector('.hero .orbit');
+      if(reduceMotion||!source||!target||typeof source.animate!=='function'){
+        appShell.classList.remove('booting','morphing');
+        splash?.remove();
+        return;
+      }
+      const from=source.getBoundingClientRect(),to=target.getBoundingClientRect();
+      if(!from.width||!to.width){appShell.classList.remove('booting','morphing');splash.remove();return}
+      const floating=source.cloneNode(true);
+      floating.classList.add('travel-ring');
+      floating.setAttribute('aria-hidden','true');
+      Object.assign(floating.style,{left:from.left+'px',top:from.top+'px',width:from.width+'px',height:from.height+'px'});
+      document.body.append(floating);
+      source.style.visibility='hidden';
+      splash.classList.add('traveling');
+      // The original mark keeps its shape. As it flies, the stroke gets thinner,
+      // opens to the user's current progress, and aligns with the dashboard orbit.
+      const openness=.24+.42*(1-Math.exp(-metrics().yes/45));
+      const endSize=to.width*1.124;
+      const endLeft=to.left+(to.width-endSize)/2;
+      const endTop=to.top+(to.height-endSize)/2;
+      const circle=floating.querySelector('circle');
+      circle?.animate([
+        {strokeWidth:'5',strokeDasharray:'107 38',transform:'rotate(-60deg)',transformOrigin:'50% 50%'},
+        {strokeWidth:'.65',strokeDasharray:(2*Math.PI*23*(1-openness)).toFixed(2)+' 145',transform:'rotate(-95deg)',transformOrigin:'50% 50%'}
+      ],{duration:1050,easing:'cubic-bezier(.2,.76,.2,1)',fill:'forwards'});
+      const flight=floating.animate([
+        {left:from.left+'px',top:from.top+'px',width:from.width+'px',height:from.height+'px'},
+        {left:endLeft+'px',top:endTop+'px',width:endSize+'px',height:endSize+'px'}
+      ],{duration:1050,easing:'cubic-bezier(.2,.76,.2,1)',fill:'forwards'});
+      setTimeout(()=>{splash.classList.add('out');appShell.classList.remove('booting');appShell.classList.add('entering')},320);
+      const done=()=>{
+        appShell.classList.remove('morphing','entering');
+        floating.animate([{opacity:1},{opacity:0}],{duration:210,fill:'forwards'}).onfinish=()=>floating.remove();
+        splash.remove();
+      };
+      flight.onfinish=done;
+      flight.oncancel=done;
+    }
+    setTimeout(finishIntro,reduceMotion?100:1400);
   })();
   </script>
   <script>
