@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090a12">
+<title>less. — Ring Lab</title>
+<style>
+:root{color-scheme:dark;--ink:#f8f1f6;--muted:#a39baa;--line:rgba(235,219,248,.13);--lilac:#d7b8ff;--peach:#efc5b8;--bg:#090a12}
+*{box-sizing:border-box}html{background:var(--bg);min-height:100%}body{margin:0;min-height:100dvh;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;-webkit-font-smoothing:antialiased}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid #e5c3fa;outline-offset:4px}
+.scene{position:relative;isolation:isolate;min-height:100dvh;width:min(100%,540px);margin:auto;padding:calc(20px + env(safe-area-inset-top)) 27px calc(30px + env(safe-area-inset-bottom));overflow:hidden;background:radial-gradient(ellipse 90% 45% at 55% 48%,rgba(48,33,73,.28),transparent 84%),linear-gradient(165deg,#0d0e1a 0%,#080a11 74%,#0c0d16)}
+.scene:before{content:"";position:absolute;z-index:-1;left:50%;top:20%;width:430px;height:430px;transform:translateX(-50%);background:radial-gradient(ellipse at 48% 46%,rgba(129,74,150,.12),rgba(54,49,110,.08) 39%,transparent 73%);filter:blur(31px);pointer-events:none;animation:atmos 12s ease-in-out infinite alternate}
+@keyframes atmos{to{transform:translateX(-48%) scale(1.11);opacity:.75}}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{display:flex;align-items:center;gap:8px;font-weight:760;font-size:29px;letter-spacing:-.09em;line-height:1}.brand svg{width:26px;height:26px}.lab-mark{font-size:9px;letter-spacing:.18em;border:1px solid rgba(233,200,244,.2);border-radius:999px;padding:8px 11px;color:#c6afd0;text-transform:uppercase;white-space:nowrap}
+.kicker{text-align:center;text-transform:uppercase;letter-spacing:.29em;font-size:10px;font-weight:650;color:#bda5c8;margin:39px 0 10px}.headline{text-align:center;font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(27px,7vw,37px);line-height:1.17;letter-spacing:-.035em;margin:0;color:#f6eaf4}
+.subhead{text-align:center;color:#9792a4;font-size:12px;line-height:1.7;max-width:270px;margin:12px auto 0}
+.stage{position:relative;width:min(92vw,410px);aspect-ratio:1;margin:7px auto -1px;display:grid;place-items:center;isolation:isolate}
+.stage:before{content:"";position:absolute;z-index:-1;inset:13%;background:radial-gradient(circle,rgba(186,116,205,.145) 0%,rgba(117,91,188,.055) 44%,transparent 70%);filter:blur(31px);animation:ambient 10s ease-in-out infinite;pointer-events:none}
+@keyframes ambient{0%,100%{transform:scale(.93);opacity:.67}50%{transform:scale(1.04);opacity:1}}
+.ring-svg{width:100%;height:100%;overflow:visible;display:block;animation:breath 9s ease-in-out infinite;transform-origin:50% 50%}
+@keyframes breath{0%,100%{transform:scale(.996);opacity:.91}50%{transform:scale(1.005);opacity:1}}
+.ring-arc{fill:none;stroke:url(#ringGradient);stroke-width:5.9;stroke-linecap:round;filter:url(#trueBloom);transform:rotate(-98deg);transform-origin:200px 200px}
+.number{position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);font-family:Georgia,"Times New Roman",serif;font-size:clamp(79px,20vw,107px);font-variant-numeric:tabular-nums;letter-spacing:-.058em;line-height:1;font-weight:400;color:#fff4fa;text-shadow:0 1px 24px rgba(255,209,248,.12);pointer-events:none}
+.under-ring{text-align:center;margin:-26px auto 0;position:relative;z-index:1}
+.caption-main{font-family:Georgia,"Times New Roman",serif;color:#f1e1ef;font-size:25px;letter-spacing:-.035em;line-height:1.2}
+.caption-sub{color:#9a91a6;font-size:12px;margin-top:10px}
+.actions{max-width:340px;margin:32px auto 0}
+.action{width:100%;border:0;border-radius:18px;background:linear-gradient(115deg,#ebd5d5,#d9c6ed 70%,#b6b2e7);color:#252236;min-height:54px;font-size:14px;font-weight:660;letter-spacing:.012em;box-shadow:0 12px 38px rgba(182,125,209,.12);transition:transform .15s,filter .15s}
+.action:active{transform:scale(.985)}.action:hover{filter:brightness(1.07)}
+.lab-panel{border:1px solid var(--line);background:linear-gradient(135deg,rgba(255,255,255,.065),rgba(255,255,255,.016));border-radius:22px;margin:30px auto 0;padding:20px 21px 22px;max-width:390px}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}.panel-head strong{font-size:12px;letter-spacing:.005em;font-weight:600;color:#eee1ed}.panel-head span{color:#9890a4;font-size:10px}
+.range-row{display:flex;gap:17px;align-items:center;margin:20px 0 21px}.range-row input{accent-color:#d0abea;flex:1;min-width:0}.range-count{font-size:13px;font-weight:650;font-variant-numeric:tabular-nums;color:#ebd6f1;width:24px;text-align:right}
+.mode-title{font-size:11px;color:#ada5b4;margin:0 0 11px}.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.mode{border:1px solid rgba(241,225,255,.14);background:rgba(255,255,255,.025);color:#a79bad;padding:11px 4px;border-radius:11px;font-size:11px}.mode[aria-pressed=true]{color:#f9eafb;border-color:rgba(225,180,240,.55);background:rgba(205,153,232,.13)}
+.motion-row{display:flex;align-items:center;justify-content:space-between;margin-top:20px;font-size:11px;color:#aaa3b0}.motion-row button{border:0;background:none;color:#ddc2e9;padding:6px 0;font-weight:600;font-size:11px}
+.note{max-width:390px;margin:18px auto 0;text-align:center;color:#777383;font-size:10px;line-height:1.7}
+.stage.celebrate .ring-svg{animation:celebrate 1.2s ease-out both}
+@keyframes celebrate{0%{transform:scale(1);filter:brightness(1)}32%{transform:scale(1.021);filter:brightness(1.64)}100%{transform:scale(1);filter:brightness(1)}}
+body.paused *,body.paused *:before{animation-play-state:paused!important}
+@media(max-width:375px){.scene{padding-left:18px;padding-right:18px}.kicker{margin-top:30px}.stage{margin-top:0}.under-ring{margin-top:-24px}.actions{margin-top:27px}}
+@media(prefers-reduced-motion:reduce){*,*:before{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="scene">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><defs><linearGradient id="markgrad" x1="0" y1="0" x2="36" y2="36"><stop stop-color="#e8cfca"/><stop offset="1" stop-color="#aa90dd"/></linearGradient></defs><circle cx="18" cy="18" r="13" stroke="url(#markgrad)" stroke-width="3.2" stroke-dasharray="63 19" transform="rotate(-65 18 18)" stroke-linecap="round"/></svg>less.</div>
+    <span class="lab-mark">Ring Lab · 01</span>
+  </header>
+  <p class="kicker">Ein bisschen mehr Licht</p>
+  <h1 class="headline">Fortschritt, den du spürst.</h1>
+  <p class="subhead">Keine Eile. Nur ein sanftes Zeichen dafür, wie weit du schon gekommen bist.</p>
+  <div class="stage" id="stage" role="img" aria-label="Beispiel eines leuchtenden Fortschrittsrings">
+    <svg class="ring-svg" viewBox="0 0 400 400" aria-hidden="true">
+      <defs>
+        <linearGradient id="ringGradient" x1="65" y1="65" x2="345" y2="340" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#f6dcd5"/>
+          <stop offset=".27" stop-color="#ecccf1"/>
+          <stop offset=".64" stop-color="#c6a4fa"/>
+          <stop offset="1" stop-color="#e9c7e7"/>
+        </linearGradient>
+        <!-- A single stroke, with optical bloom generated inside the filter. -->
+        <filter id="trueBloom" x="-55%" y="-55%" width="210%" height="210%" color-interpolation-filters="sRGB">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="13" result="wide"/>
+          <feComponentTransfer in="wide" result="wideDim"><feFuncA id="wideStrength" type="linear" slope=".42"/></feComponentTransfer>
+          <feGaussianBlur in="SourceGraphic" stdDeviation="4.7" result="near"/>
+          <feComponentTransfer in="near" result="nearDim"><feFuncA id="nearStrength" type="linear" slope=".74"/></feComponentTransfer>
+          <feMerge><feMergeNode in="wideDim"/><feMergeNode in="nearDim"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <circle id="arc" class="ring-arc" cx="200" cy="200" r="130"/>
+    </svg>
+    <div id="number" class="number">28</div>
+  </div>
+  <div class="under-ring"><div class="caption-main">bewusst gewonnene Tage</div><div class="caption-sub">Jeder einzelne zählt.</div></div>
+  <div class="actions"><button id="plus" class="action" type="button">Einen Tag gewinnen <span aria-hidden="true">✦</span></button></div>
+  <section class="lab-panel" aria-label="Ring ausprobieren">
+    <div class="panel-head"><strong>Dein Ring, dein Gefühl</strong><span>Interaktive Vorschau</span></div>
+    <div class="range-row"><input id="days" aria-label="Beispieltage" type="range" min="0" max="90" step="1" value="28"><output id="value" class="range-count" for="days">28</output></div>
+    <p class="mode-title">Wie intensiv soll das Leuchten sein?</p>
+    <div class="modes" role="group" aria-label="Lichtintensität">
+      <button class="mode" type="button" data-mode="quiet" aria-pressed="false">Dezent</button>
+      <button class="mode" type="button" data-mode="soft" aria-pressed="true">Sanft</button>
+      <button class="mode" type="button" data-mode="vivid" aria-pressed="false">Lebendig</button>
+    </div>
+    <div class="motion-row"><span>Sanftes Atmen im Ruhezustand</span><button id="motion" type="button" aria-pressed="true">Animation an</button></div>
+  </section>
+  <p class="note">Isolierter Design-Prototyp. Die echte less.-App und deine gespeicherten Check-ins werden hier nicht verändert.</p>
+</main>
+<script>
+(function(){
+  'use strict';
+  const arc=document.getElementById('arc'),days=document.getElementById('days'),number=document.getElementById('number'),value=document.getElementById('value'),stage=document.getElementById('stage');
+  const wide=document.getElementById('wideStrength'),near=document.getElementById('nearStrength'),motion=document.getElementById('motion');
+  const circumference=2*Math.PI*130;
+  const openness=d=>.24+.42*(1-Math.exp(-d/45));
+  let current=28,frame=0,celebrateTimer=0;
+  const paint=d=>{const visible=circumference*(1-openness(d));arc.setAttribute('stroke-dasharray',visible.toFixed(2)+' '+circumference.toFixed(2));};
+  const update=(target,celebrate)=>{
+    target=Math.max(0,Math.min(90,Math.round(target)));cancelAnimationFrame(frame);
+    const start=current,begin=performance.now(),duration=850;
+    const tick=now=>{const t=Math.min(1,(now-begin)/duration),e=1-Math.pow(1-t,3);paint(start+(target-start)*e);if(t<1)frame=requestAnimationFrame(tick);else current=target};
+    const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduced){paint(target);current=target}else{frame=requestAnimationFrame(tick)}
+    days.value=String(target);value.textContent=String(target);number.textContent=String(target);
+    stage.setAttribute('aria-label',target+' Beispieltage mit wachsender Ringöffnung');
+    if(celebrate&&!reduced){stage.classList.remove('celebrate');void stage.offsetWidth;stage.classList.add('celebrate');clearTimeout(celebrateTimer);celebrateTimer=setTimeout(()=>stage.classList.remove('celebrate'),1250)}
+  };
+  paint(current);
+  days.addEventListener('input',()=>{current=Number(days.value);paint(current);value.textContent=days.value;number.textContent=days.value;stage.setAttribute('aria-label',days.value+' Beispieltage mit wachsender Ringöffnung')});
+  document.getElementById('plus').addEventListener('click',()=>update(Math.min(90,Number(days.value)+1),true));
+  const strengths={quiet:[.16,.36],soft:[.42,.74],vivid:[.85,1.10]};
+  document.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{const v=strengths[button.dataset.mode];wide.setAttribute('slope',String(v[0]));near.setAttribute('slope',String(v[1]));document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){document.body.classList.add('paused');motion.textContent='Animation aus';motion.setAttribute('aria-pressed','false')}
+  motion.addEventListener('click',()=>{const paused=document.body.classList.toggle('paused');motion.textContent=paused?'Animation aus':'Animation an';motion.setAttribute('aria-pressed',String(!paused))});
+})();
+</script>
+</body>
+</html>
