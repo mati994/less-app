@@ -155,6 +155,16 @@ body{touch-action:pan-x pan-y}
  .ring-stage::before,.orbit .ring-glow,.orbit .ring-glow-wide,.ring-stage.celebrate .ring-glow{animation:none!important}
  .app.entering{transition:none!important}
 }
+
+/* less. v0.4 — Ring Lab optical bloom / single filtered stroke */
+.ring-stage .orbit{transform:none;animation:lessBreathe 9s ease-in-out infinite;transform-origin:50% 50%;overflow:visible}
+.ring-arc{fill:none;stroke:url(#ringGradient);stroke-width:5.9;stroke-linecap:round;filter:url(#trueBloom)}
+.ring-stage::before{opacity:.75;filter:blur(28px)}
+.ring-stage.celebrate .orbit{animation:lessCelebrate 1.3s ease-out both}
+@keyframes lessBreathe{0%,100%{transform:scale(.996);opacity:.91}50%{transform:scale(1.005);opacity:1}}
+@keyframes lessCelebrate{0%{transform:scale(1);filter:brightness(1)}35%{transform:scale(1.021);filter:brightness(1.64)}100%{transform:scale(1);filter:brightness(1)}}
+@media(prefers-reduced-motion:reduce){.ring-stage .orbit,.ring-stage.celebrate .orbit{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -163,7 +173,7 @@ body{touch-action:pan-x pan-y}
     <span class="splash-tag">Make room for better</span>
   </div>
   <main class="app booting morphing" id="app" aria-live="polite"></main>
-  <div class="desktop-caption">less. · Interaktives Designkonzept · Version 0.3</div>
+  <div class="desktop-caption">less. · Interaktives Designkonzept · Version 0.4</div>
   <div id="modal-root"></div>
   <script>
   (()=>{'use strict';
@@ -186,24 +196,35 @@ body{touch-action:pan-x pan-y}
     function safeText(t){return String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
     function demoData(){const checkins={};for(let i=1;i<=30;i++)checkins[dateKey(shifted(-i))]=i===8||i===19?'no':'yes';return {isDemo:true,habit:'Weniger Scrollen.',mode:'reduce',goal:'Maximal 45 Minuten Social Media am Tag',created:dateKey(shifted(-30)),checkins}}
     function load(){try{const val=JSON.parse(localStorage.getItem(KEY));if(val&&typeof val.habit==='string'&&val.checkins&&typeof val.checkins==='object')return val}catch(e){}return demoData()}
-    let data=load(), tab='home', modal=null, toastTimer=null, pendingDate=null, celebratePending=false;
+    let data=load(), tab='home', modal=null, toastTimer=null, pendingDate=null, celebratePending=false, pendingRingFrom=null;
     const root=document.getElementById('app'), modalRoot=document.getElementById('modal-root');
     function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){toast('Speichern ist in diesem Browser nicht möglich.')}}
     function metrics(){let yes=0,recorded=0,lastSuccess=0,lastRecorded=0,streak=0;Object.entries(data.checkins).forEach(([d,val])=>{if(d<=dateKey(new Date())&&val==='yes')yes++;if(d<=dateKey(new Date())&&(val==='yes'||val==='no'))recorded++});for(let i=0;i<30;i++){const v=data.checkins[dateKey(shifted(-i))];if(v==='yes'){lastSuccess++;lastRecorded++}else if(v==='no')lastRecorded++}let start=data.checkins[dateKey(shifted(0))]==='yes'?0:1;for(let i=start;i<12000;i++){if(data.checkins[dateKey(shifted(-i))]==='yes')streak++;else break}return {yes,recorded,lastSuccess,lastRecorded,streak,pct:lastRecorded?Math.round(lastSuccess/lastRecorded*100):null}}
     function logo(){return `<div class="brand"><svg class="brandmark" viewBox="0 0 36 36" fill="none"><defs><linearGradient id="markgrad" x1="0" y1="0" x2="36" y2="36"><stop stop-color="#e8cfca"/><stop offset="1" stop-color="#aa90dd"/></linearGradient></defs><circle cx="18" cy="18" r="13" stroke="url(#markgrad)" stroke-width="3.2" stroke-dasharray="63 19" transform="rotate(-65 18 18)"/></svg>less.</div>`}
     function header(){return `<header class="brandrow">${logo()}<button class="iconbutton" aria-label="Einstellungen" data-tab="more">${icons.settings}</button></header>`}
     function bottom(){return `<nav class="bottom-nav" aria-label="Hauptnavigation">${[['home','Heute',icons.home],['history','Verlauf',icons.calendar],['more','Mehr',icons.more]].map(([name,title,icon])=>`<button class="tab ${name===tab?'active':''}" data-tab="${name}" aria-label="${title}" aria-current="${name===tab?'page':'false'}">${icon}<span>${title}</span><i class="dot"></i></button>`).join('')}</nav>`}
+    function ringArcLength(n){return 2*Math.PI*130*(1-(.24+.42*(1-Math.exp(-n/45))))}
     function home(){
       const m=metrics(),todayVal=data.checkins[dateKey(new Date())],done=!!todayVal;
-      const openness=.24+.42*(1-Math.exp(-m.yes/45));
-      const circumference=2*Math.PI*105,arc=(circumference*(1-openness)).toFixed(2),total=circumference.toFixed(2);
+      const total=(2*Math.PI*130).toFixed(2),arc=ringArcLength(m.yes).toFixed(2);
       const fmtDate=new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
-      const rings=['ring-glow ring-glow-wide','ring-glow','ring-core'].map(cls=>'<circle class="'+cls+'" cx="130" cy="130" r="105" data-arc="'+arc+'" style="stroke-dasharray:'+arc+' '+total+';stroke-dashoffset:0"/>').join('');
+      const ringSvg='<svg class="orbit" viewBox="0 0 400 400" fill="none" aria-hidden="true"><defs>'+
+        '<linearGradient id="ringGradient" x1="65" y1="65" x2="345" y2="340" gradientUnits="userSpaceOnUse">'+
+          '<stop offset="0" stop-color="#f6dcd5"/><stop offset=".27" stop-color="#ecccf1"/><stop offset=".64" stop-color="#c6a4fa"/><stop offset="1" stop-color="#e9c7e7"/>'+
+        '</linearGradient>'+
+        '<filter id="trueBloom" x="-55%" y="-55%" width="210%" height="210%" color-interpolation-filters="sRGB">'+
+          '<feGaussianBlur in="SourceGraphic" stdDeviation="13" result="wide"/>'+
+          '<feComponentTransfer in="wide" result="wideDim"><feFuncA type="linear" slope=".70"/></feComponentTransfer>'+
+          '<feGaussianBlur in="SourceGraphic" stdDeviation="4.7" result="near"/>'+
+          '<feComponentTransfer in="near" result="nearDim"><feFuncA type="linear" slope=".97"/></feComponentTransfer>'+
+          '<feMerge><feMergeNode in="wideDim"/><feMergeNode in="nearDim"/><feMergeNode in="SourceGraphic"/></feMerge>'+
+        '</filter></defs>'+
+        '<circle class="ring-arc" cx="200" cy="200" r="130" transform="rotate(-98 200 200)" stroke-dasharray="'+arc+' '+total+'" data-arc="'+arc+'"/>'+
+        '</svg>';
       return '<section class="screen screen-home">'+header()+
         '<div class="home-body"><div class="home-date">'+safeText(fmtDate)+'</div>'+
         '<div class="home-center"><div class="quiet-landscape" aria-hidden="true"></div>'+
-        '<div class="ring-stage" aria-label="'+m.yes+' bewusst gewonnene Tage">'+
-          '<svg class="orbit" viewBox="0 0 260 260" fill="none" aria-hidden="true"><defs><linearGradient id="progressGradient" x1="0" y1="0" x2="260" y2="260" gradientUnits="userSpaceOnUse"><stop stop-color="#e8caff"/><stop offset=".48" stop-color="#c8a6f3"/><stop offset="1" stop-color="#f4bba9"/></linearGradient></defs>'+rings+'</svg>'+
+        '<div class="ring-stage" aria-label="'+m.yes+' bewusst gewonnene Tage">'+ringSvg+
           '<div class="metric-number">'+m.yes+'</div></div>'+
         '<div class="ring-copy"><div class="metric-label">bewusst gewonnene Tage</div><div class="metric-note">Jeder einzelne zählt.</div></div></div>'+
         '<div class="home-actions"><div class="habit-compact"><div class="habit-glyph" aria-hidden="true"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 22V11M13 17C6 18 3 13 4 6c6-1 10 3 9 11ZM13 15c0-7 4-10 10-10 1 7-3 11-10 10Z"/></svg></div>'+
@@ -217,8 +238,33 @@ body{touch-action:pan-x pan-y}
     function more(){return `<section class="screen">${header()}<h1 class="page-heading">Dein Raum.</h1><p class="page-intro">So viel wie nötig. So wenig wie möglich. Du bestimmst, wie du less. nutzt.</p><button class="settings-action" data-action="new"><span>Eigene Gewohnheit festlegen<small>Ein neues Ziel statt der Demo beginnen.</small></span>${icons.arrow}</button><button class="settings-action" data-action="demo"><span>Demo zurücksetzen<small>28 Beispieltage und die Startansicht laden.</small></span>${icons.arrow}</button><button class="settings-action" data-action="export"><span>Einträge exportieren<small>Deine Daten als JSON-Datei sichern.</small></span>${icons.arrow}</button><button class="settings-action" data-action="erase"><span>Einträge löschen<small>Alle lokalen Einträge entfernen.</small></span>${icons.arrow}</button><div class="notice" style="margin-top:18px">Deine Einträge bleiben in diesem Browser gespeichert. Es gibt keinen Account und keine Datenübertragung an einen Server. Benachrichtigungen sind für eine spätere Version vorgesehen.</div><div style="flex:1"></div>${bottom()}</section>`}
     let formMode='abstain';
     function setup(){tab='setup';root.innerHTML=`<section class="screen onboarding">${logo()}<div class="eyebrow">Ein Anfang genügt</div><h1>Was möchtest du loslassen?</h1><p>Eine Gewohnheit. Ein klarer Fokus. Du musst nicht alles auf einmal verändern.</p><form id="habit-form"><label for="habit-name" class="field">DEIN FOKUS</label><input id="habit-name" class="field-input" maxlength="48" required placeholder="z. B. Nicht mehr rauchen" autocomplete="off"><label class="field">DEIN WEG</label><div class="mode-group"><button type="button" class="mode-option selected" data-mode="abstain">Ganz verzichten</button><button type="button" class="mode-option" data-mode="reduce">Bewusst reduzieren</button></div><label for="habit-goal" class="field">DEIN ZIEL (OPTIONAL)</label><input id="habit-goal" class="field-input" maxlength="100" placeholder="z. B. Jeden Tag ohne Zigarette" autocomplete="off"><p class="helper">Einmal täglich hältst du fest, ob du dein Ziel erreicht hast. Keine Stimmungstests, kein Urteil.</p><button type="submit" class="primary-button"><span>Meinen Weg beginnen</span>${icons.arrow}</button></form><button class="back-link" data-action="back">Zurück zur Ansicht</button></section>`}
+    function animateRingProgress(from,to,pulse){
+      const stage=root.querySelector('.ring-stage'),ring=stage?.querySelector('.ring-arc'),num=stage?.querySelector('.metric-number');
+      if(!stage||!ring||!num)return;
+      const total=(2*Math.PI*130).toFixed(2);
+      const paint=v=>{
+        const length=ringArcLength(v).toFixed(2);
+        ring.setAttribute('stroke-dasharray',length+' '+total);
+        num.textContent=String(Math.round(v));
+      };
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){paint(to);return}
+      const fromValue=Number.isFinite(from)?from:to;
+      const toValue=Number.isFinite(to)?to:fromValue;
+      paint(fromValue);
+      const begin=performance.now(),duration=1040;
+      function frame(now){
+        // Guard against navigation and replacing the ring during the animation.
+        if(!stage.isConnected)return;
+        const t=Math.max(0,Math.min(1,(now-begin)/duration)),ease=1-Math.pow(1-t,3);
+        paint(fromValue+(toValue-fromValue)*ease);
+        if(t<1)requestAnimationFrame(frame);
+        else if(pulse){stage.classList.remove('celebrate');void stage.offsetWidth;stage.classList.add('celebrate');setTimeout(()=>stage.classList.remove('celebrate'),1450)}
+      }
+      requestAnimationFrame(frame);
+    }
     function render(){
-      const previousArc=root.querySelector('.orbit .ring-core')?.getAttribute('data-arc');
+      const oldRing=root.querySelector('.orbit .ring-arc');
+      const previousArc=oldRing?Number(oldRing.getAttribute('data-arc')):null;
       if(tab==='setup'){setup();return}
       root.innerHTML=tab==='history'?history():tab==='more'?more():home();
       const page=root.querySelector('.screen');
@@ -232,12 +278,13 @@ body{touch-action:pan-x pan-y}
           page.insertBefore(scroller,nav);
         }
       }
-      const currentArc=root.querySelector('.orbit .ring-core')?.getAttribute('data-arc');
-      if(previousArc&&currentArc&&previousArc!==currentArc&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-        const total=(2*Math.PI*105).toFixed(2);
-        root.querySelectorAll('.orbit [data-arc]').forEach(circle=>{
-          circle.animate([{strokeDasharray:previousArc+' '+total},{strokeDasharray:currentArc+' '+total}],{duration:1050,easing:'cubic-bezier(.2,.8,.2,1)'});
-        });
+      const newRing=root.querySelector('.orbit .ring-arc');
+      const currentArc=newRing?Number(newRing.getAttribute('data-arc')):null;
+      // On a successful check-in the celebration waits for the result sheet to close.
+      if(previousArc!==null&&currentArc!==null&&Math.abs(previousArc-currentArc)>.01&&!celebratePending){
+        const opacity=.24+.42*(1-Math.exp(-metrics().yes/45));
+        const oldDays=opacity>0 ? -45*Math.log(Math.max(.0001,1-(1-previousArc/(2*Math.PI*130)-.24)/.42)) : metrics().yes;
+        animateRingProgress(oldDays,metrics().yes,false);
       }
     }
     function sheet(content){modalRoot.innerHTML=`<div class="overlay" id="sheet-overlay"><div class="sheet" role="dialog" aria-modal="true" aria-label="Check-in"><div class="handle"></div><button class="sheet-close" aria-label="Schließen" data-action="close">×</button>${content}</div></div>`;modal='open'}
@@ -250,9 +297,9 @@ body{touch-action:pan-x pan-y}
       if(btn.dataset.tab){tab=btn.dataset.tab;render();return}
       if(btn.dataset.check){checkin(dateKey(new Date()));return}
       if(btn.dataset.day){checkin(btn.dataset.day);return}
-      if(btn.dataset.result){const val=btn.dataset.result;if(!pendingDate)return;const before=data.checkins[pendingDate];if(val==='clear')delete data.checkins[pendingDate];else data.checkins[pendingDate]=val;celebratePending=(val==='yes'&&before!=='yes');data.isDemo=false;save();closeSheet();render();if(val==='clear')toast('Eintrag entfernt');else showResult(val);return}
+      if(btn.dataset.result){const val=btn.dataset.result;if(!pendingDate)return;const before=data.checkins[pendingDate];pendingRingFrom=(val==='yes'&&before!=='yes')?metrics().yes:null;if(val==='clear')delete data.checkins[pendingDate];else data.checkins[pendingDate]=val;celebratePending=(pendingRingFrom!==null);data.isDemo=false;save();closeSheet();render();if(val==='clear')toast('Eintrag entfernt');else showResult(val);return}
       if(btn.dataset.mode){formMode=btn.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('selected',x.dataset.mode===formMode));document.getElementById('habit-goal').placeholder=formMode==='reduce'?'z. B. Maximal 30 Minuten pro Tag':'z. B. Jeden Tag ohne Zigarette';return}
-      switch(btn.dataset.action){case 'close':closeSheet();if(celebratePending){celebratePending=false;const stage=root.querySelector('.ring-stage');if(stage){stage.classList.add('celebrate');setTimeout(()=>stage.classList.remove('celebrate'),1550)}}break;case 'back':tab='home';render();break;case 'new':formMode='abstain';setup();break;case 'demo':if(confirm('Die bisherigen Einträge werden durch Beispieldaten ersetzt. Fortfahren?')){data=demoData();save();tab='home';render();toast('Demo geladen')}break;case 'erase':if(confirm('Alle Einträge wirklich löschen?')){data.checkins={};data.isDemo=false;save();tab='home';render();toast('Einträge gelöscht')}break;case 'export':{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='less-meine-daten.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Datenexport gestartet');break}}
+      switch(btn.dataset.action){case 'close':closeSheet();if(celebratePending){celebratePending=false;const from=pendingRingFrom;pendingRingFrom=null;animateRingProgress(from,metrics().yes,true)}break;case 'back':tab='home';render();break;case 'new':formMode='abstain';setup();break;case 'demo':if(confirm('Die bisherigen Einträge werden durch Beispieldaten ersetzt. Fortfahren?')){data=demoData();save();tab='home';render();toast('Demo geladen')}break;case 'erase':if(confirm('Alle Einträge wirklich löschen?')){data.checkins={};data.isDemo=false;save();tab='home';render();toast('Einträge gelöscht')}break;case 'export':{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='less-meine-daten.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Datenexport gestartet');break}}
     });
     document.addEventListener('submit',e=>{if(e.target.id!=='habit-form')return;e.preventDefault();const habit=document.getElementById('habit-name').value.trim(),goal=document.getElementById('habit-goal').value.trim();if(!habit)return;const hadRecords=Object.keys(data.checkins).length;if(hadRecords&&!confirm('Damit beginnt ein neues Ziel. Die bisherigen Einträge werden ersetzt. Weiter?'))return;data={isDemo:false,habit,goal,mode:formMode,created:dateKey(new Date()),checkins:{}};save();tab='home';render();toast('Dein neues Ziel ist bereit')});
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
@@ -266,33 +313,38 @@ body{touch-action:pan-x pan-y}
       if(reduceMotion||!source||!target||typeof target.animate!=='function'){fallback();return}
       const from=source.getBoundingClientRect(),to=target.getBoundingClientRect();
       if(!from.width||!to.width){fallback();return}
-      // Clone the ACTUAL dashboard ring geometry: its final frame is pixel-identical.
-      const flying=target.cloneNode(true);
-      flying.removeAttribute('aria-hidden');
-      flying.classList.add('flight-orbit');
-      const centerX=from.left+from.width/2,centerY=from.top+from.height/2;
-      const startSize=from.width*(46/64)*(260/210);
-      const start={left:centerX-startSize/2,top:centerY-startSize/2,width:startSize,height:startSize};
-      Object.assign(flying.style,{left:start.left+'px',top:start.top+'px',width:start.width+'px',height:start.height+'px'});
+      // Fly a clone of the actual ring SVG; at the final frame it is the very same shape.
+      const flying=target.cloneNode(true),arc=flying.querySelector('.ring-arc');
+      if(!arc){fallback();return}
+      flying.removeAttribute('aria-hidden');flying.classList.add('flight-orbit');
+      const cx=from.left+from.width/2,cy=from.top+from.height/2;
+      const startSize=(from.width*46/64)/(260/400);
+      const start={left:cx-startSize/2,top:cy-startSize/2,width:startSize,height:startSize};
+      Object.assign(flying.style,{left:start.left+'px',top:start.top+'px',width:start.width+'px',height:start.height+'px',transform:'none',animation:'none'});
       document.body.appendChild(flying);
-      const total=2*Math.PI*105;
-      const beginning=(total*107/145).toFixed(2),finalArc=target.querySelector('.ring-core')?.getAttribute('data-arc');
-      flying.querySelectorAll('[data-arc]').forEach(circle=>{
-        circle.style.strokeDasharray=beginning+' '+total.toFixed(2);
-        circle.animate([{strokeDasharray:beginning+' '+total.toFixed(2)},{strokeDasharray:finalArc+' '+total.toFixed(2)}],
-          {duration:1060,easing:'cubic-bezier(.22,.74,.2,1)',fill:'forwards'});
-      });
-      flying.querySelector('.ring-core')?.animate([{strokeWidth:23},{strokeWidth:7.1}],
-        {duration:1060,easing:'cubic-bezier(.22,.74,.2,1)',fill:'forwards'});
-      source.style.visibility='hidden';
-      splash.classList.add('traveling');
+      const full=2*Math.PI*130,oldLength=full*107/145,newLength=ringArcLength(metrics().yes);
+      arc.setAttribute('transform','rotate(-60 200 200)');
+      arc.setAttribute('stroke-dasharray',oldLength.toFixed(2)+' '+full.toFixed(2));
+      arc.style.strokeWidth='28px';
+      source.style.visibility='hidden';splash.classList.add('traveling');
+      let raf=0;const begin=performance.now(),duration=1060;
+      function updateRing(now){
+        if(!flying.isConnected)return;
+        const t=Math.min(1,Math.max(0,(now-begin)/duration));
+        const ease=1-Math.pow(1-t,3);
+        arc.setAttribute('stroke-dasharray',(oldLength+(newLength-oldLength)*ease).toFixed(2)+' '+full.toFixed(2));
+        arc.setAttribute('transform','rotate('+(-60-38*ease).toFixed(3)+' 200 200)');
+        arc.style.strokeWidth=(28+(5.9-28)*ease).toFixed(2)+'px';
+        if(t<1)raf=requestAnimationFrame(updateRing);
+      }
+      raf=requestAnimationFrame(updateRing);
       const flight=flying.animate([
-        {left:start.left+'px',top:start.top+'px',width:start.width+'px',height:start.height+'px',transform:'rotate(-60deg)'},
-        {left:to.left+'px',top:to.top+'px',width:to.width+'px',height:to.height+'px',transform:'rotate(-95deg)'}
-      ],{duration:1060,easing:'cubic-bezier(.22,.74,.2,1)',fill:'forwards'});
+        {left:start.left+'px',top:start.top+'px',width:start.width+'px',height:start.height+'px'},
+        {left:to.left+'px',top:to.top+'px',width:to.width+'px',height:to.height+'px'}
+      ],{duration,easing:'cubic-bezier(.22,.74,.2,1)',fill:'forwards'});
       setTimeout(()=>{splash.classList.add('out');appShell.classList.remove('booting');appShell.classList.add('entering')},280);
       const done=()=>{
-        // Reveal the true target first, and discard the flight in the same paint.
+        cancelAnimationFrame(raf);
         appShell.classList.remove('morphing','entering');
         requestAnimationFrame(()=>{flying.remove();splash.remove()});
       };
