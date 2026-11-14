@@ -1,8 +1,13 @@
-/* less. v0.4 — Ring Lab optical bloom / single filtered stroke */
+/* less. Vorschau — deutlich sichtbarer Leuchtring und Check-in Feedback. */
 .ring-stage .orbit{transform:none;animation:lessBreathe 9s ease-in-out infinite;transform-origin:50% 50%;overflow:visible}
-.ring-arc{fill:none;stroke:url(#ringGradient);stroke-width:8.2;stroke-linecap:round;filter:url(#trueBloom)}
+/* Spezifischer als .orbit circle aus base.css, das bisher die Strichstaerke ueberschrieben hat. */
+.ring-stage .orbit .ring-arc{fill:none;stroke:url(#ringGradient);stroke-width:14.5;stroke-linecap:round;filter:url(#trueBloom)}
 .ring-stage::before{opacity:.75;filter:blur(28px)}
-.ring-stage.celebrate .orbit{animation:lessCelebrate 1.3s ease-out both}
+.ring-stage.celebrate .orbit{animation:lessCelebrate 1.35s ease-out both}
+.ring-stage.celebrate .orbit .ring-arc{animation:lessArcFlash 1.35s ease-out both}
+.ring-stage.celebrate::before{animation:lessHaloFlash 1.35s ease-out both}
 @keyframes lessBreathe{0%,100%{transform:scale(.996);opacity:.91}50%{transform:scale(1.005);opacity:1}}
-@keyframes lessCelebrate{0%{transform:scale(1);filter:brightness(1)}35%{transform:scale(1.021);filter:brightness(1.64)}100%{transform:scale(1);filter:brightness(1)}}
-@media(prefers-reduced-motion:reduce){.ring-stage .orbit,.ring-stage.celebrate .orbit{animation:none!important}}
+@keyframes lessCelebrate{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.045);filter:brightness(1.35)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes lessArcFlash{0%,100%{stroke-width:14.5}30%{stroke-width:19}}
+@keyframes lessHaloFlash{0%{opacity:.75;transform:scale(1)}30%{opacity:1;transform:scale(1.14)}100%{opacity:.75;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.ring-stage .orbit,.ring-stage.celebrate .orbit,.ring-stage.celebrate .orbit .ring-arc,.ring-stage.celebrate::before{animation:none!important}}
