@@ -27,46 +27,103 @@ export function animateRingSvgProgress(root,from,to,pulse){
     }
 
 export function finishIntroAnimation({splash,appShell,root,metrics,reduceMotion}){
-      const source=splash?.querySelector('.splash-logo svg');
-      const target=root.querySelector('.ring-stage .orbit');
-      const fallback=()=>{appShell.classList.remove('booting','morphing','entering');splash?.remove()};
-      if(reduceMotion||!source||!target||typeof target.animate!=='function'){fallback();return}
-      const from=source.getBoundingClientRect(),to=target.getBoundingClientRect();
-      if(!from.width||!to.width){fallback();return}
-      // Fly a clone of the actual ring SVG; at the final frame it is the very same shape.
-      const flying=target.cloneNode(true),arc=flying.querySelector('.ring-arc');
-      if(!arc){fallback();return}
-      flying.removeAttribute('aria-hidden');flying.classList.add('flight-orbit');
-      const cx=from.left+from.width/2,cy=from.top+from.height/2;
-      const startSize=(from.width*46/64)/(260/400);
-      const start={left:cx-startSize/2,top:cy-startSize/2,width:startSize,height:startSize};
-      Object.assign(flying.style,{left:start.left+'px',top:start.top+'px',width:start.width+'px',height:start.height+'px',transform:'none',animation:'none'});
-      document.body.appendChild(flying);
-      const full=2*Math.PI*130,oldLength=full*107/145,newLength=ringArcLength(metrics().yes);
-      arc.setAttribute('transform','rotate(-60 200 200)');
-      arc.setAttribute('stroke-dasharray',oldLength.toFixed(2)+' '+full.toFixed(2));
-      arc.style.strokeWidth='28px';
-      source.style.visibility='hidden';splash.classList.add('traveling');
-      let raf=0;const begin=performance.now(),duration=1060;
-      function updateRing(now){
-        if(!flying.isConnected)return;
-        const t=Math.min(1,Math.max(0,(now-begin)/duration));
-        const ease=1-Math.pow(1-t,3);
-        arc.setAttribute('stroke-dasharray',(oldLength+(newLength-oldLength)*ease).toFixed(2)+' '+full.toFixed(2));
-        arc.setAttribute('transform','rotate('+(-60-38*ease).toFixed(3)+' 200 200)');
-        arc.style.strokeWidth=(28+(5.9-28)*ease).toFixed(2)+'px';
-        if(t<1)raf=requestAnimationFrame(updateRing);
-      }
-      raf=requestAnimationFrame(updateRing);
-      const flight=flying.animate([
-        {left:start.left+'px',top:start.top+'px',width:start.width+'px',height:start.height+'px'},
-        {left:to.left+'px',top:to.top+'px',width:to.width+'px',height:to.height+'px'}
-      ],{duration,easing:'cubic-bezier(.22,.74,.2,1)',fill:'forwards'});
-      setTimeout(()=>{splash.classList.add('out');appShell.classList.remove('booting');appShell.classList.add('entering')},280);
-      const done=()=>{
-        cancelAnimationFrame(raf);
-        appShell.classList.remove('morphing','entering');
-        requestAnimationFrame(()=>{flying.remove();splash.remove()});
-      };
-      flight.onfinish=done;flight.oncancel=done;
+  const source=splash?.querySelector('.splash-logo svg');
+  const target=root.querySelector('.ring-stage .orbit');
+  const finishWithoutFlight=()=>{
+    appShell.classList.remove('booting','morphing','entering');
+    splash?.remove();
+  };
+  if(reduceMotion||!source||!target||typeof requestAnimationFrame!=='function'){
+    finishWithoutFlight();
+    return;
+  }
+
+  // Safari kann beim Reload eine alte Scrollposition übernehmen.
+  // Die Vorschau beginnt ausdrücklich oben. Das Ziel wird dennoch in JEDEM Frame
+  // frisch gemessen, falls die Safari-Adressleiste oder der Viewport sich bewegt.
+  if(typeof window.scrollTo==='function')window.scrollTo(0,0);
+  const from=source.getBoundingClientRect();
+  const initialTarget=target.getBoundingClientRect();
+  if(!from.width||!initialTarget.width){
+    finishWithoutFlight();
+    return;
+  }
+  const flying=target.cloneNode(true);
+  const arc=flying.querySelector('.ring-arc');
+  if(!arc){
+    finishWithoutFlight();
+    return;
+  }
+  flying.removeAttribute('aria-hidden');
+  flying.classList.add('flight-orbit');
+  const startDiameter=(from.width*46/64)/(260/400);
+  const start={
+    left:from.left+from.width/2-startDiameter/2,
+    top:from.top+from.height/2-startDiameter/2,
+    width:startDiameter,
+    height:startDiameter
+  };
+  Object.assign(flying.style,{
+    left:start.left+'px',top:start.top+'px',
+    width:start.width+'px',height:start.height+'px',
+    transform:'none',animation:'none'
+  });
+  document.body.appendChild(flying);
+
+  const full=2*Math.PI*130;
+  const previousLength=full*107/145;
+  const nextLength=ringArcLength(metrics().yes);
+  const duration=1060;
+  let finished=false,frameId=0;
+  source.style.visibility='hidden';
+  splash.classList.add('traveling');
+  setTimeout(()=>{
+    if(finished)return;
+    splash.classList.add('out');
+    appShell.classList.remove('booting');
+    appShell.classList.add('entering');
+  },280);
+
+  const complete=()=>{
+    if(finished)return;
+    finished=true;
+    cancelAnimationFrame(frameId);
+    // Die tatsächliche Dashboard-SVG wird im selben Frame sichtbar,
+    // in dem die Flug-SVG verschwindet: keine Doppelbelichtung oder Sprünge.
+    appShell.classList.remove('booting','morphing','entering');
+    flying.remove();
+    splash.remove();
+  };
+
+  const startedAt=performance.now();
+  const frame=now=>{
+    if(finished)return;
+    if(!flying.isConnected || !target.isConnected){
+      complete();
+      return;
     }
+    const t=Math.max(0,Math.min(1,(now-startedAt)/duration));
+    const eased=1-Math.pow(1-t,3);
+    const destination=target.getBoundingClientRect();
+    if(!destination.width){
+      complete();
+      return;
+    }
+    const interpolate=(a,b)=>a+(b-a)*eased;
+    Object.assign(flying.style,{
+      left:interpolate(start.left,destination.left)+'px',
+      top:interpolate(start.top,destination.top)+'px',
+      width:interpolate(start.width,destination.width)+'px',
+      height:interpolate(start.height,destination.height)+'px'
+    });
+    const length=interpolate(previousLength,nextLength);
+    const rotation=interpolate(-60,-98);
+    const strokeWidth=interpolate(28,5.9);
+    arc.setAttribute('stroke-dasharray',length.toFixed(2)+' '+full.toFixed(2));
+    arc.setAttribute('transform','rotate('+rotation.toFixed(3)+' 200 200)');
+    arc.style.strokeWidth=strokeWidth.toFixed(2)+'px';
+    if(t<1)frameId=requestAnimationFrame(frame);
+    else complete();
+  };
+  frameId=requestAnimationFrame(frame);
+}
