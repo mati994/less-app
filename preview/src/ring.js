@@ -20,7 +20,9 @@ export function animateRingSvgProgress(root,from,to,pulse){
       const fromValue=Number.isFinite(from)?from:to;
       const toValue=Number.isFinite(to)?to:fromValue;
       if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){paint(toValue);return}
-      // Den sanften Lichtimpuls sofort beim Speichern starten, nicht erst nach dem Zahlenlauf.\n      pulseStage();\n      if(Math.abs(fromValue-toValue)<.001){paint(toValue);return}\n      paint(fromValue);
+      // Den sanften Lichtimpuls sofort beim Speichern starten, nicht erst nach dem Zahlenlauf.
+      pulseStage();
+      if(Math.abs(fromValue-toValue)<.001){paint(toValue);return}\n      paint(fromValue);
       const begin=performance.now(),duration=1040;
       function frame(now){
         // Guard against navigation and replacing the ring during the animation.
@@ -63,6 +65,9 @@ export function finishIntroAnimation({splash,appShell,root,metrics,reduceMotion}
   }
   flying.removeAttribute('aria-hidden');
   flying.classList.add('flight-orbit');
+  // Der fliegende Ring muss trotz der ausgeblendeten Dashboard-SVG sichtbar bleiben.
+  flying.style.visibility='visible';
+  flying.style.opacity='1';
   const startDiameter=(from.width*46/64)/(260/400);
   const start={
     left:from.left+from.width/2-startDiameter/2,
