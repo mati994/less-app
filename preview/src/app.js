@@ -1,7 +1,7 @@
 import {icons,dateKey,safeText} from './config.js';
 import {demoData,load,persist,calculateMetrics} from './storage.js';
-import {home,history,more,setupHtml} from './views.js';
-import {ringArcLength,animateRingSvgProgress,finishIntroAnimation} from './ring.js';
+import {home,history,more,setupHtml} from './views.js?v=20261114-4';
+import {ringArcLength,animateRingSvgProgress,finishIntroAnimation} from './ring.js?v=20261114-4';
 
 let data=load(), tab='home', modal=null, toastTimer=null, pendingDate=null, celebratePending=false, pendingRingFrom=null, suppressAutoRing=false;
     const root=document.getElementById('app'), modalRoot=document.getElementById('modal-root');
@@ -46,8 +46,9 @@ function render(){
       if(btn.dataset.tab){tab=btn.dataset.tab;render();return}
       if(btn.dataset.quickCheck){
         const today=dateKey(new Date()),value=btn.dataset.quickCheck;
+        if(value!=='yes'&&value!=='no')return;
         const previous=data.checkins[today],wasDemo=data.isDemo,from=metrics().yes;
-        if(value==='clear')delete data.checkins[today];else data.checkins[today]=value;
+        data.checkins[today]=value;
         data.isDemo=false;
         if(!persist(data)){
           if(previous===undefined)delete data.checkins[today];else data.checkins[today]=previous;
@@ -58,15 +59,9 @@ function render(){
         const to=metrics().yes;
         suppressAutoRing=true;
         try{render()}finally{suppressAutoRing=false}
-        if(value==='clear'){
-          if(from!==to)animateRingProgress(from,to,false);
-          toast('Eintrag entfernt');
-        }else{
-          // Jeder Check-in erzeugt einen ruhigen Ringimpuls, auch an schwierigen Tagen.
-          // Die Zahl verändert sich nur, wenn sich die Anzahl erfolgreicher Tage ändert.
-          animateRingProgress(from,to,true);
-          toast(value==='yes'?'Für heute gespeichert.':'Heute festgehalten. Morgen ist ein neuer Tag.');
-        }
+        // Sofortige sichtbare Rueckmeldung bei jedem Tippen, auch bei gleichem Status.
+        animateRingProgress(from,to,true);
+        toast(value==='yes'?'Für heute gespeichert.':'Heute festgehalten. Morgen ist ein neuer Tag.');
         return;
       }
       if(btn.dataset.day){checkin(btn.dataset.day);return}
