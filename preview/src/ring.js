@@ -22,7 +22,8 @@ export function animateRingSvgProgress(root,from,to,pulse){
       if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){paint(toValue);return}
       // Den sanften Lichtimpuls sofort beim Speichern starten, nicht erst nach dem Zahlenlauf.
       pulseStage();
-      if(Math.abs(fromValue-toValue)<.001){paint(toValue);return}\n      paint(fromValue);
+      if(Math.abs(fromValue-toValue)<.001){paint(toValue);return}
+      paint(fromValue);
       const begin=performance.now(),duration=1040;
       function frame(now){
         // Guard against navigation and replacing the ring during the animation.
