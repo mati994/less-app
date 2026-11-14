@@ -1,0 +1,19 @@
+{
+  "name": "less. – Testversion",
+  "short_name": "less. Test",
+  "description": "Eigenständiger less.-Entwicklungsstand zum Ausprobieren – keine echten Einträge.",
+  "lang": "de-DE",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090b12",
+  "theme_color": "#0b0b13",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
