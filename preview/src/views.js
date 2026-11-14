@@ -1,5 +1,5 @@
 import {icons, safeText, dateKey, shifted, weekdayShort} from './config.js';
-import {ringArcLength} from './ring.js';
+import {ringArcLength} from './ring.js?v=20261114-4';
 
 export function logo(){return `<div class="brand"><svg class="brandmark" viewBox="0 0 36 36" fill="none"><defs><linearGradient id="markgrad" x1="0" y1="0" x2="36" y2="36"><stop stop-color="#e8cfca"/><stop offset="1" stop-color="#aa90dd"/></linearGradient></defs><circle cx="18" cy="18" r="13" stroke="url(#markgrad)" stroke-width="3.2" stroke-dasharray="63 19" transform="rotate(-65 18 18)"/></svg>less.</div>`}
     export function header(){return `<header class="brandrow">${logo()}<button class="iconbutton" aria-label="Einstellungen" data-tab="more">${icons.settings}</button></header>`}
@@ -33,7 +33,6 @@ export function logo(){return `<div class="brand"><svg class="brandmark" viewBox
         '<section class="check-container"><div class="today-label"><span>Dein täglicher Moment</span><strong>'+(done?(todayVal==='yes'?'HEUTE ERREICHT':'HEUTE EINGETRAGEN'):'NOCH OFFEN')+'</strong></div>'+
         '<div class="quick-check-actions"><button type="button" class="primary-button quick-check-yes '+(todayVal==='yes'?'is-selected':'')+'" data-quick-check="yes" aria-pressed="'+(todayVal==='yes')+'"><span>Heute geschafft</span>'+icons.check+'</button>'+
         '<button type="button" class="quick-check-no '+(todayVal==='no'?'is-selected':'')+'" data-quick-check="no" aria-pressed="'+(todayVal==='no')+'"><span>Heute war es schwer</span></button></div>'+
-        (done?'<button type="button" class="quick-check-clear" data-quick-check="clear">Eintrag entfernen</button>':'')+
         '</section></div></div>'+bottom(tab)+'</section>';
     }
     export function history(data,metrics,tab){const m=metrics(),days=[],start=shifted(-29);for(let i=0;i<30;i++){const d=new Date(start);d.setDate(start.getDate()+i);days.push(d)}const leading=(start.getDay()+6)%7;let cal=weekdayShort.map(x=>`<div class="cal-day">${x}</div>`).join('');for(let i=0;i<leading;i++)cal+='<div></div>';
