@@ -1,6 +1,6 @@
 /* less. v0.4 — Ring Lab optical bloom / single filtered stroke */
 .ring-stage .orbit{transform:none;animation:lessBreathe 9s ease-in-out infinite;transform-origin:50% 50%;overflow:visible}
-.ring-arc{fill:none;stroke:url(#ringGradient);stroke-width:5.9;stroke-linecap:round;filter:url(#trueBloom)}
+.ring-arc{fill:none;stroke:url(#ringGradient);stroke-width:8.2;stroke-linecap:round;filter:url(#trueBloom)}
 .ring-stage::before{opacity:.75;filter:blur(28px)}
 .ring-stage.celebrate .orbit{animation:lessCelebrate 1.3s ease-out both}
 @keyframes lessBreathe{0%,100%{transform:scale(.996);opacity:.91}50%{transform:scale(1.005);opacity:1}}

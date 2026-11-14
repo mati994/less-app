@@ -10,9 +10,17 @@ export function animateRingSvgProgress(root,from,to,pulse){
         ring.setAttribute('stroke-dasharray',length+' '+total);
         num.textContent=String(Math.round(v));
       };
-      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){paint(to);return}
+      const pulseStage=()=>{
+        if(!pulse||!stage.isConnected)return;
+        stage.classList.remove('celebrate');
+        void stage.offsetWidth;
+        stage.classList.add('celebrate');
+        setTimeout(()=>stage.classList.remove('celebrate'),1450);
+      };
       const fromValue=Number.isFinite(from)?from:to;
       const toValue=Number.isFinite(to)?to:fromValue;
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){paint(toValue);return}
+      if(Math.abs(fromValue-toValue)<.001){paint(toValue);pulseStage();return}
       paint(fromValue);
       const begin=performance.now(),duration=1040;
       function frame(now){
@@ -21,7 +29,7 @@ export function animateRingSvgProgress(root,from,to,pulse){
         const t=Math.max(0,Math.min(1,(now-begin)/duration)),ease=1-Math.pow(1-t,3);
         paint(fromValue+(toValue-fromValue)*ease);
         if(t<1)requestAnimationFrame(frame);
-        else if(pulse){stage.classList.remove('celebrate');void stage.offsetWidth;stage.classList.add('celebrate');setTimeout(()=>stage.classList.remove('celebrate'),1450)}
+        else pulseStage();
       }
       requestAnimationFrame(frame);
     }
@@ -118,7 +126,7 @@ export function finishIntroAnimation({splash,appShell,root,metrics,reduceMotion}
     });
     const length=interpolate(previousLength,nextLength);
     const rotation=interpolate(-60,-98);
-    const strokeWidth=interpolate(28,5.9);
+    const strokeWidth=interpolate(28,8.2);
     arc.setAttribute('stroke-dasharray',length.toFixed(2)+' '+full.toFixed(2));
     arc.setAttribute('transform','rotate('+rotation.toFixed(3)+' 200 200)');
     arc.style.strokeWidth=strokeWidth.toFixed(2)+'px';

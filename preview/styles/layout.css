@@ -26,7 +26,7 @@ body{touch-action:pan-x pan-y}
 .orbit .ring-core{stroke:url(#progressGradient);stroke-width:7.1;fill:none;stroke-linecap:round;filter:drop-shadow(0 0 2px rgba(230,180,247,.45))}
 .orbit .ring-glow{stroke:url(#progressGradient);stroke-width:15;fill:none;stroke-linecap:round;opacity:.34;filter:blur(7px);animation:ringGlow 8s ease-in-out infinite}
 .orbit .ring-glow-wide{stroke-width:28;opacity:.14;filter:blur(13px);animation:ringGlowWide 8s ease-in-out infinite}
-.ring-stage .metric-number{position:absolute;top:50%;left:50%;transform:translate(-50%,-52%);font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(65px,10.4dvh,94px);letter-spacing:-.058em;line-height:1;color:#f6eaf1;font-variant-numeric:tabular-nums;text-align:center;white-space:nowrap;text-shadow:0 1px 17px rgba(248,214,245,.09);pointer-events:none}
+.ring-stage .metric-number{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(65px,10.4dvh,94px);letter-spacing:-.058em;line-height:1;color:#f6eaf1;font-variant-numeric:tabular-nums;text-align:center;white-space:nowrap;text-shadow:0 1px 17px rgba(248,214,245,.09);pointer-events:none}
 .ring-copy{text-align:center;z-index:2;position:relative;margin:0 auto 3px}
 .ring-copy .metric-label{font-family:Georgia,"Times New Roman",serif;font-size:clamp(21px,5.4vw,27px);line-height:1.1;letter-spacing:-.025em;color:#f4e7ee;font-weight:400;margin:0}
 .ring-copy .metric-note{margin:7px 0 0;color:#b4aabc;letter-spacing:.12em;text-transform:uppercase;font-size:9px}
@@ -43,6 +43,13 @@ body{touch-action:pan-x pan-y}
 .habit-info h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(17px,4.7vw,21px);line-height:1.17;letter-spacing:-.025em;margin:5px 0 0;font-weight:400;color:#f5eaf4;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .habit-info .habit-goal{font-size:10px;color:#a39aac;margin:5px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .check-container{margin:0}
+.quick-check-actions{display:flex;flex-direction:column;gap:7px}
+.quick-check-yes{min-height:54px}
+.quick-check-yes.is-selected{box-shadow:0 0 0 2px rgba(241,215,250,.37),0 11px 30px rgba(188,137,200,.14)}
+.quick-check-no{width:100%;min-height:39px;display:flex;align-items:center;justify-content:center;border-radius:19px;border:1px solid rgba(225,197,247,.16);color:#c7baca;background:rgba(196,166,222,.055);font-size:12px;transition:background .2s,border-color .2s}
+.quick-check-no.is-selected{border-color:rgba(207,182,235,.57);background:rgba(181,146,219,.16);color:#f0e4f4}
+.quick-check-clear{display:block;background:transparent;border:0;color:#8c8397;font-size:10px;min-height:25px;margin:3px auto 0;padding:3px 12px}
+.quick-check-no:active,.quick-check-yes:active{transform:scale(.99)}
 .today-label{margin-bottom:8px;font-size:10px}
 .primary-button{min-height:58px;border-radius:27px;justify-content:center;position:relative;padding:0 19px;font-size:15px;background:linear-gradient(105deg,#d6b8ed,#e4bad8 56%,#f2c4ad);box-shadow:0 11px 30px rgba(188,137,200,.14),inset 0 1px 0 rgba(255,255,255,.48)}
 .primary-button svg{position:absolute;right:20px;width:18px;height:18px}
@@ -70,6 +77,9 @@ body{touch-action:pan-x pan-y}
  .habit-compact{padding:9px 13px;min-height:58px;border-radius:16px}
  .habit-glyph{width:31px;height:31px}
  .primary-button{min-height:50px}
+ .quick-check-no{min-height:35px}
+ .quick-check-actions{gap:5px}
+ .quick-check-clear{min-height:23px;margin-top:0}
  .bottom-nav{min-height:48px;padding-top:8px}
  .today-label{margin-bottom:5px}
 }
@@ -79,6 +89,9 @@ body{touch-action:pan-x pan-y}
  .ring-copy .metric-note{display:none}
  .habit-info .habit-goal{display:none}
  .home-actions{padding-bottom:0}
+ .quick-check-yes{min-height:44px}
+ .quick-check-no{min-height:33px}
+ .quick-check-clear{min-height:21px}
  .screen .brandrow{min-height:35px}
  .bottom-nav{min-height:42px}
 }
