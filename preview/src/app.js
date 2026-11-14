@@ -1,7 +1,7 @@
 import {icons,dateKey,safeText} from './config.js';
 import {demoData,load,persist,calculateMetrics} from './storage.js';
-import {home,history,more,setupHtml} from './views.js?v=20261114-4';
-import {ringArcLength,animateRingSvgProgress,finishIntroAnimation} from './ring.js?v=20261114-4';
+import {home,history,more,setupHtml} from './views.js?v=20261114-6';
+import {ringArcLength,animateRingSvgProgress,finishIntroAnimation} from './ring.js?v=20261114-6';
 
 let data=load(), tab='home', modal=null, toastTimer=null, pendingDate=null, celebratePending=false, pendingRingFrom=null, suppressAutoRing=false;
     const root=document.getElementById('app'), modalRoot=document.getElementById('modal-root');
