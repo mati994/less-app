@@ -1,7 +1,7 @@
 /* Offline-Cache nur für diese Vorschau; den Live-Cache nie löschen. */
 const PREFIX='less-preview-';
-const CACHE_NAME=PREFIX+'2026-11-14-v6';
-const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./preview.css","./styles/base.css","./styles/layout.css?v=20261114-6","./styles/ring.css?v=20261114-6","./src/config.js","./src/storage.js","./src/ring.js?v=20261114-6","./src/views.js?v=20261114-6","./src/app.js?v=20261114-6","./src/register-sw.js"];
+const CACHE_NAME=PREFIX+'2026-11-15-v7';
+const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./icon-512.png","./preview.css","./styles/base.css","./styles/layout.css?v=20261114-6","./styles/ring.css?v=20261114-6","./src/config.js","./src/storage.js","./src/ring.js?v=20261114-6","./src/views.js?v=20261114-6","./src/app.js?v=20261114-6","./src/register-sw.js"];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
