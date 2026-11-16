@@ -39,3 +39,16 @@
 
 /* Keep the meaning of the counter visible on compact screens too. */
 .ring-copy .metric-note{display:block}
+
+/* Functional preview controls only; the welcome composition stays unchanged. */
+.onboarding-preview:not([hidden]){position:fixed;z-index:120;top:0;left:50%;transform:translateX(-50%);width:min(100%,460px);height:calc(76px + env(safe-area-inset-top));padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#211b2c;border-bottom:1px solid #675172;color:#efe0f6;font-size:13px;line-height:1.5}
+.onboarding-preview small{color:#cbbbd7;font-size:11px}
+.onboarding-preview button{min-height:44px;padding:10px 12px;border:1px solid #9681a6;border-radius:12px;background:transparent;color:#f3e7fa;font:inherit}
+.app.previewing{padding-top:calc(76px + env(safe-area-inset-top))}
+.app.previewing .screen{height:100%;overflow-y:auto}
+.previewing .screen-home .home-body{min-height:490px}
+.demo-banner>div:first-child{width:100%;line-height:1.55}
+.demo-banner strong,.demo-banner span{display:block}
+.demo-banner span{margin-top:3px;color:#c7b8d1}
+.demo-navigation{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;width:100%}
+@media(min-width:620px){.onboarding-preview:not([hidden]){top:42px}}

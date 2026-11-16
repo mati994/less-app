@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="./styles/base.css">
   <link rel="stylesheet" href="./styles/layout.css?v=20261116-pearl21">
   <link rel="stylesheet" href="./styles/ring.css?v=20261116-pearl21">
-  <link rel="stylesheet" href="./preview.css?v=20261116-beginning2">
-  <link rel="stylesheet" href="./styles/onboarding.css?v=20261116-beginning2">
+  <link rel="stylesheet" href="./preview.css?v=20261116-preview21">
+  <link rel="stylesheet" href="./styles/onboarding.css?v=20261116-preview21">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icon-512.png?v=20261115">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,10 +36,11 @@
     <span class="splash-tag">Make room for better</span>
   </div>
   <div id="storage-notice" class="storage-notice" role="alert" hidden></div>
+  <aside id="onboarding-preview" class="onboarding-preview" aria-label="Erststart-Vorschau" hidden><span>Testvorschau<br><small>Es wird nichts gespeichert.</small></span><button type="button" data-action="preview-end">Vorschau beenden</button></aside>
   <main class="app booting morphing" id="app" aria-live="polite"></main>
   <div class="desktop-caption">less. · Testversion · Pearl Light 2.1</div>
   <div id="modal-root"></div>
-  <script type="module" src="./src/app.js?v=20261116-beginning2"></script>
+  <script type="module" src="./src/app.js?v=20261116-preview21"></script>
   <script src="./src/register-sw.js" defer></script>
 </body>
 </html>

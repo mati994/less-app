@@ -43,7 +43,8 @@ function count(app,n){assert.match(app.root.innerHTML,new RegExp('class="metric-
   }
   // A legacy explicit demo is retained byte-for-byte until an explicit personal start.
   const legacy=JSON.stringify({...fixture,isDemo:true}),store=new Map([[KEY,legacy]]),oldDemo=await boot(store);
-  oldDemo.click({quickCheck:'yes'});assert.equal(store.get(KEY),legacy);
+  assert.match(oldDemo.root.innerHTML,/welcome-heading/);
+  oldDemo.click({action:'demo'});oldDemo.click({quickCheck:'yes'});assert.equal(store.get(KEY),legacy);
   oldDemo.click({action:'begin'});oldDemo.state.confirm=false;oldDemo.submit();assert.equal(store.get(KEY),legacy);
   oldDemo.state.confirm=true;oldDemo.state.failWrite=true;oldDemo.submit();assert.equal(store.get(KEY),legacy);
   oldDemo.state.failWrite=false;oldDemo.submit();assert.deepEqual(JSON.parse(store.get(KEY)).checkins,{});count(oldDemo,0);scenarios++;

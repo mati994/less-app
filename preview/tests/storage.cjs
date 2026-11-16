@@ -10,18 +10,18 @@ const original=JSON.stringify(fixture,null,2);
 let assertions=0;
 async function boot(store=new Map([[KEY,original],[LIVE,'untouched']]),options={}){
   const events={},messages=[];
-  const state={failRead:false,failWrite:false,confirm:true,...options};
-  const notice={hidden:true,textContent:''},modal={innerHTML:''};
+  const state={failRead:false,failWrite:false,confirm:true,writeAttempts:0,confirmCalls:0,...options};
+  const notice={hidden:true,textContent:''},previewBar={hidden:true},modal={innerHTML:''};
   const fields={'habit-name':{value:'Neues Ziel'},'habit-goal':{value:'Mein neuer Fokus'}};
   const root={innerHTML:'',querySelector(sel){
     if(sel==='.screen')return {classList:{add(){}},querySelector(){return null}};
     return null;
   }};
-  const storage={getItem(key){if(state.failRead)throw Error('read denied');return store.get(key)??null;},setItem(key,val){if(state.failWrite)throw Error('quota exceeded');store.set(key,val)}};
-  const context=vm.createContext({console,localStorage:storage,confirm:()=>state.confirm,
+  const storage={getItem(key){if(state.failRead)throw Error('read denied');return store.get(key)??null;},setItem(key,val){state.writeAttempts++;if(state.failWrite)throw Error('quota exceeded');store.set(key,val)}};
+  const context=vm.createContext({console,localStorage:storage,confirm:()=>{state.confirmCalls++;return state.confirm},
     setTimeout(){},clearTimeout(){},performance:{now:()=>0},requestAnimationFrame(){},
     window:{matchMedia:()=>({matches:false})},
-    document:{getElementById:id=>id==='app'?root:id==='modal-root'?modal:id==='storage-notice'?notice:fields[id]||null,
+    document:{getElementById:id=>id==='app'?root:id==='modal-root'?modal:id==='storage-notice'?notice:id==='onboarding-preview'?previewBar:fields[id]||null,
       querySelector:sel=>sel==='input[name="mode"]:checked'?{value:state.mode||'reduce'}:null,addEventListener:(name,fn)=>events[name]=fn,
       createElement:()=>({remove(){}}),body:{append:el=>messages.push(el.textContent)}}});
   const modules=new Map();
@@ -29,7 +29,7 @@ async function boot(store=new Map([[KEY,original],[LIVE,'untouched']]),options={
   const app=read(path.resolve(__dirname,'../src/app.js'));
   await app.link((specifier,parent)=>read(path.resolve(path.dirname(parent.identifier),specifier.split('?')[0])));
   await app.evaluate();
-  return {store,state,root,modal,notice,messages,
+  return {store,state,root,modal,notice,previewBar,messages,
     click:dataset=>events.click({target:{closest:()=>({dataset})}}),
     submit:()=>events.submit({target:{id:'habit-form'},preventDefault(){}}),
     storage:modules.get(path.resolve(__dirname,'../src/storage.js')).namespace};

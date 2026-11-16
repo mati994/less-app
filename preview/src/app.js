@@ -1,9 +1,10 @@
 import {icons,dateKey,safeText} from './config.js';
-import {demoData,load,persist,calculateMetrics,storageIssue} from './storage.js?v=20261116-beginning2';
-import {home,history,more,setupHtml,welcomeHtml,demoBanner} from './views.js?v=20261116-beginning2';
+import {demoData,load,persist,calculateMetrics,storageIssue} from './storage.js?v=20261116-preview21';
+import {home,history,more,setupHtml,welcomeHtml,demoBanner} from './views.js?v=20261116-preview21';
 import {ringArcLength,animateRingSvgProgress,finishIntroAnimation,playPearlLight,stopPearlLight} from './ring.js?v=20261116-pearl21';
 
-let savedData=load(), data=savedData, demoMode=savedData?.isDemo===true;
+let savedData=load(), data=savedData?.isDemo===true?null:savedData, demoMode=false;
+let onboardingPreview=false, previewPersonal=null;
 let tab=data?'home':'welcome', modal=null, toastTimer=null, pendingDate=null, celebratePending=false, suppressAutoRing=false;
     const root=document.getElementById('app'), modalRoot=document.getElementById('modal-root');
 const storageMessages={
@@ -20,6 +21,8 @@ function storageFeedback(){
   return message;
 }
 function save(candidate){
+  // Hard boundary: every personal commit is intercepted while rehearsing.
+  if(onboardingPreview){previewPersonal=data=candidate;demoMode=false;return true;}
   if(!persist(candidate)){toast(storageFeedback());return false;}
   savedData=data=candidate;
   demoMode=false;
@@ -31,7 +34,8 @@ function saveCheckin(candidate){
   if(demoMode){data={...candidate,isDemo:true};return true;}
   return save(candidate);
 }
-function hasPersonal(){return !!savedData && savedData.isDemo!==true;}
+function activeSaved(){return onboardingPreview?previewPersonal:savedData;}
+function hasPersonal(){const value=activeSaved();return !!value && value.isDemo!==true;}
 function metrics(){return calculateMetrics(data || {checkins:{}})}
 let setupReturn='welcome';
 function focusHeading(){root.querySelector('h1')?.focus?.({preventScroll:true});}
@@ -41,10 +45,33 @@ function showHome(){
   try{render()}finally{suppressAutoRing=false}
 }
 function leaveDemo(){
-  demoMode=false;data=savedData;
+  demoMode=false;data=activeSaved();
   if(hasPersonal())showHome();
   else {data=null;tab='welcome';render();}
   focusHeading();
+}
+
+function clearTransient(){
+  celebratePending=false;closeSheet();stopPearlLight(root);
+  clearTimeout(toastTimer);document.querySelector('.toast')?.remove();
+}
+function previewIndicator(){
+  const bar=document.getElementById('onboarding-preview');
+  if(bar)bar.hidden=!onboardingPreview;
+  root.classList?.toggle?.('previewing',onboardingPreview);
+}
+function startPreview(){
+  clearTransient();onboardingPreview=true;previewPersonal=null;
+  data=null;demoMode=false;tab='welcome';previewIndicator();
+  const notice=document.getElementById('storage-notice');if(notice)notice.hidden=true;
+  render();focusHeading();
+}
+function endPreview(){
+  if(!onboardingPreview)return;
+  clearTransient();onboardingPreview=false;previewPersonal=null;
+  // Read the latest committed personal state, including changes from another tab.
+  savedData=load();data=savedData?.isDemo===true?null:savedData;demoMode=false;
+  previewIndicator();storageFeedback();tab=data?'home':'welcome';render();focusHeading();
 }
 
 function render(){
@@ -54,10 +81,10 @@ function render(){
       const previousArc=oldRing?Number(oldRing.getAttribute('data-arc')):null;
       if(tab==='welcome'){root.innerHTML=welcomeHtml();return;}
       if(tab==='setup'){setup();return}
-      root.innerHTML=tab==='history'?history(data,metrics,tab):tab==='more'?more(tab,demoMode,hasPersonal()):home(data,metrics,tab);
+      root.innerHTML=tab==='history'?history(data,metrics,tab):tab==='more'?more(tab,demoMode,hasPersonal(),onboardingPreview):home(data,metrics,tab);
       if(demoMode){
         root.querySelector('.screen')?.classList?.add('is-demo');
-        root.querySelector('.screen')?.insertAdjacentHTML?.('afterbegin',demoBanner(hasPersonal()));
+        root.querySelector('.screen')?.insertAdjacentHTML?.('afterbegin',demoBanner(hasPersonal(),metrics().yes));
       }
       const page=root.querySelector('.screen');
       if(tab==='history'||tab==='more'){
@@ -103,7 +130,7 @@ function render(){
         try{render()}finally{suppressAutoRing=false}
         animateRingSvgProgress(root,from,to);
         if(value==='yes')playPearlLight(root);
-        toast(demoMode?'In der Demo ausprobiert.':value==='yes'?'Für heute gespeichert.':'Heute festgehalten. Morgen ist ein neuer Tag.');
+        toast(onboardingPreview?'Nur in der Vorschau ausprobiert.':demoMode?'In der Demo ausprobiert.':value==='yes'?'Für heute gespeichert.':'Heute festgehalten. Morgen ist ein neuer Tag.');
         return;
       }
       if(btn.dataset.day && data){checkin(btn.dataset.day);return}
@@ -124,6 +151,8 @@ function render(){
         return;
       }
       switch(btn.dataset.action){
+        case 'preview-start':startPreview();break;
+        case 'preview-end':endPreview();break;
         case 'close':closeSheet();break;
         case 'back':tab=setupReturn;render();focusHeading();break;
         case 'begin':
@@ -132,7 +161,7 @@ function render(){
         case 'new':setupReturn='home';setup();break;
         case 'leave-demo':leaveDemo();break;
         case 'demo':
-          if(storageIssue()){toast(storageFeedback());return;}
+          if(!onboardingPreview && storageIssue()){toast(storageFeedback());return;}
           demoMode=true;data=demoData();showHome();focusHeading();
           break;
         case 'erase':
@@ -141,7 +170,7 @@ function render(){
           tab='home';render();toast('Einträge gelöscht');
           break;
         case 'export':{
-          if(demoMode){toast('Demo-Einträge sind nur zum Ausprobieren.');return;}
+          if(onboardingPreview || demoMode){toast('Vorschau-Einträge sind nur zum Ausprobieren.');return;}
           // Never export the unavailable-data placeholder as a personal backup.
           if(['invalid','read','conflict'].includes(storageIssue())){toast(storageFeedback());return;}
           const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -162,12 +191,12 @@ function render(){
       if(!habit){nameField.reportValidity?.();return;}
       const mode=document.querySelector('input[name="mode"]:checked')?.value;
       if(!['reduce','abstain'].includes(mode))return;
-      const hadRecords=savedData && Object.keys(savedData.checkins).length;
+      const hadRecords=!onboardingPreview && savedData && Object.keys(savedData.checkins).length;
       if(hadRecords&&!confirm(savedData.isDemo===true
         ?'Dein bisher gespeicherter Demo-Stand wird durch dein neues Ziel ohne Einträge ersetzt. Fortfahren?'
         :'Damit beginnt ein neues Ziel. Die bisherigen Einträge werden ersetzt. Weiter?'))return;
       if(!save({isDemo:false,habit,goal,mode,created:dateKey(new Date()),checkins:{}}))return;
-      showHome();focusHeading();toast('Dein neues Ziel ist bereit');
+      showHome();focusHeading();toast(onboardingPreview?'Vorschau gestartet. Nichts wurde gespeichert.':'Dein neues Ziel ist bereit');
     });
     document.addEventListener('input',e=>{if(e.target.id==='habit-name')e.target.setCustomValidity('');});
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
