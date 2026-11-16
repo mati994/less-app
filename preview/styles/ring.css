@@ -1,14 +1,89 @@
 .flight-orbit .ring-arc{fill:none;stroke:url(#ringGradient);stroke-width:14.5;stroke-linecap:round;filter:url(#trueBloom)}
-/* less. Vorschau — deutlich sichtbarer Leuchtring und Check-in Feedback. */
-.ring-stage .orbit{transform:none;animation:lessBreathe 9s ease-in-out infinite;transform-origin:50% 50%;overflow:visible}
-/* Spezifischer als .orbit circle aus base.css, das bisher die Strichstaerke ueberschrieben hat. */
-.ring-stage .orbit .ring-arc{fill:none;stroke:url(#ringGradient);stroke-width:14.5;stroke-linecap:round;filter:url(#trueBloom)}
-.ring-stage::before{opacity:.75;filter:blur(28px)}
-.ring-stage.celebrate .orbit{animation:lessCelebrate 1.35s ease-out both}
-.ring-stage.celebrate .orbit .ring-arc{animation:lessArcFlash 1.35s ease-out both}
-.ring-stage.celebrate::before{animation:lessHaloFlash 1.35s ease-out both}
-@keyframes lessBreathe{0%,100%{transform:scale(.996);opacity:.91}50%{transform:scale(1.005);opacity:1}}
-@keyframes lessCelebrate{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.045);filter:brightness(1.35)}100%{transform:scale(1);filter:brightness(1)}}
-@keyframes lessArcFlash{0%,100%{stroke-width:14.5}30%{stroke-width:19}}
-@keyframes lessHaloFlash{0%{opacity:.75;transform:scale(1)}30%{opacity:1;transform:scale(1.14)}100%{opacity:.75;transform:scale(1)}}
-@media(prefers-reduced-motion:reduce){.ring-stage .orbit,.ring-stage.celebrate .orbit,.ring-stage.celebrate .orbit .ring-arc,.ring-stage.celebrate::before{animation:none!important}}
+
+.ring-stage .orbit{
+  transform:none;
+  animation:lessBreathe 9s ease-in-out infinite;
+  transform-origin:center;
+  overflow:visible;
+}
+.ring-stage .orbit .ring-arc{
+  fill:none;
+  stroke:url(#ringGradient);
+  stroke-width:14.5;
+  stroke-linecap:round;
+}
+.ring-stage::before{
+  opacity:.75;
+  filter:none;
+  background:radial-gradient(circle,rgba(196,148,225,.18),rgba(129,88,171,.08) 42%,transparent 70%);
+}
+
+.pearl-light{
+  position:absolute;
+  z-index:7;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+/* Reuse the painted gradient while the wave expands. */
+.pearl-wave{
+  position:absolute;
+  width:256px;
+  height:256px;
+  left:var(--pearl-x);
+  top:var(--pearl-y);
+  margin:-128px 0 0 -128px;
+  background:
+    radial-gradient(ellipse 44% 38% at 30% 34%,rgba(255,229,215,.39),transparent 77%),
+    radial-gradient(ellipse 42% 43% at 69% 57%,rgba(223,193,255,.35),transparent 81%),
+    radial-gradient(circle closest-side,transparent 24%,rgba(190,150,238,.07) 37%,rgba(232,186,245,.27) 52%,rgba(255,238,245,.44) 60%,rgba(223,193,255,.19) 66%,transparent 83%);
+  will-change:transform,opacity;
+  animation:pearlSpread 1.76s cubic-bezier(.22,.55,.36,1) both;
+}
+
+.pearl-rim{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,#ffe5d7,rgba(247,209,234,.2) 52%,#dfc1ff) top / 100% 1px,
+    linear-gradient(90deg,#ffe5d7,rgba(247,209,234,.2) 52%,#dfc1ff) bottom / 100% 1px,
+    linear-gradient(#ffe5d7,rgba(255,229,215,.44),#ffe5d7) left / 1px 100%,
+    linear-gradient(#dfc1ff,rgba(223,193,255,.44),#dfc1ff) right / 1px 100%;
+  background-repeat:no-repeat;
+}
+
+.pearl-light::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  box-shadow:inset 6px 0 16px -10px rgba(255,229,215,.68),
+             inset -6px 0 16px -10px rgba(223,193,255,.72);
+}
+
+.pearl-rim,.pearl-light::after{
+  will-change:opacity;
+  animation:pearlRim 2.15s ease-in-out both;
+}
+
+@keyframes lessBreathe{
+  0%,100%{transform:scale(.996);opacity:.91}
+  50%{transform:scale(1.005);opacity:1}
+}
+@keyframes pearlSpread{
+  0%{transform:scale(.36);opacity:0}
+  23%{opacity:.78}
+  57%{opacity:.48}
+  100%{transform:scale(var(--pearl-scale));opacity:0}
+}
+@keyframes pearlRim{
+  0%,10%{opacity:0}
+  38%{opacity:.86}
+  58%{opacity:.52}
+  100%{opacity:0}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ring-stage .orbit{animation:none}
+  .pearl-light{display:none}
+}

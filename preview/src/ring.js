@@ -1,40 +1,57 @@
 // Der leuchtende Fortschrittsring: Geometrie, Check-in-Animation und Intro.
 export function ringArcLength(n){return 2*Math.PI*130*(1-(.24+.42*(1-Math.exp(-n/45))))}
 
-export function animateRingSvgProgress(root,from,to,pulse){
-      const stage=root.querySelector('.ring-stage'),ring=stage?.querySelector('.ring-arc'),num=stage?.querySelector('.metric-number');
-      if(!stage||!ring||!num)return;
-      const total=(2*Math.PI*130).toFixed(2);
-      const paint=v=>{
-        const length=ringArcLength(v).toFixed(2);
-        ring.setAttribute('stroke-dasharray',length+' '+total);
-        num.textContent=String(Math.round(v));
-      };
-      const pulseStage=()=>{
-        if(!pulse||!stage.isConnected)return;
-        stage.classList.remove('celebrate');
-        void stage.offsetWidth;
-        stage.classList.add('celebrate');
-        setTimeout(()=>stage.classList.remove('celebrate'),1450);
-      };
-      const fromValue=Number.isFinite(from)?from:to;
-      const toValue=Number.isFinite(to)?to:fromValue;
-      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){paint(toValue);return}
-      // Den sanften Lichtimpuls sofort beim Speichern starten, nicht erst nach dem Zahlenlauf.
-      pulseStage();
-      if(Math.abs(fromValue-toValue)<.001){paint(toValue);return}
-      paint(fromValue);
-      const begin=performance.now(),duration=1040;
-      function frame(now){
-        // Guard against navigation and replacing the ring during the animation.
-        if(!stage.isConnected)return;
-        const t=Math.max(0,Math.min(1,(now-begin)/duration)),ease=1-Math.pow(1-t,3);
-        paint(fromValue+(toValue-fromValue)*ease);
-        if(t<1)requestAnimationFrame(frame);
-        else paint(toValue);
-      }
-      requestAnimationFrame(frame);
-    }
+export function playPearlLight(root){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+
+  const bounds=root.getBoundingClientRect();
+  const ring=root.querySelector('.ring-stage')?.getBoundingClientRect();
+  const x=ring ? ring.left+ring.width/2-bounds.left : bounds.width/2;
+  const y=ring ? ring.top+ring.height/2-bounds.top : bounds.height*.42;
+  const radius=Math.hypot(Math.max(x,bounds.width-x),Math.max(y,bounds.height-y));
+
+  root.querySelector('.pearl-light')?.remove();
+  const effect=document.createElement('div');
+  effect.className='pearl-light';
+  effect.setAttribute('aria-hidden','true');
+  effect.innerHTML='<div class="pearl-wave"></div><div class="pearl-rim"></div>';
+  effect.style.setProperty('--pearl-x',x+'px');
+  effect.style.setProperty('--pearl-y',y+'px');
+  // The crest sits at 60% of the sprite radius and reaches the farthest corner.
+  effect.style.setProperty('--pearl-scale',String(radius/(128*.6)));
+  const rim=effect.lastElementChild;
+  rim.addEventListener('animationend',()=>effect.remove(),{once:true});
+  rim.addEventListener('animationcancel',()=>effect.remove(),{once:true});
+  root.append(effect);
+}
+
+export function animateRingSvgProgress(root,from,to){
+  const stage=root.querySelector('.ring-stage');
+  const ring=stage?.querySelector('.ring-arc');
+  const number=stage?.querySelector('.metric-number');
+  if(!stage||!ring||!number)return;
+
+  const total=(2*Math.PI*130).toFixed(2);
+  const paint=value=>{
+    ring.setAttribute('stroke-dasharray',ringArcLength(value).toFixed(2)+' '+total);
+    const label=String(Math.round(value));
+    if(number.textContent!==label)number.textContent=label;
+  };
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||Math.abs(from-to)<.001){
+    paint(to);
+    return;
+  }
+
+  paint(from);
+  const begin=performance.now();
+  function frame(now){
+    if(!stage.isConnected)return;
+    const progress=Math.max(0,Math.min(1,(now-begin)/760));
+    paint(from+(to-from)*(1-Math.pow(1-progress,3)));
+    if(progress<1)requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
 
 export function finishIntroAnimation({splash,appShell,root,metrics,reduceMotion}){
   const source=splash?.querySelector('.splash-logo svg');
