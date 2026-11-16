@@ -1,0 +1,41 @@
+/* A quiet, static first beginning. Scoped away from Pearl Light. */
+.screen.welcome-screen,.screen.onboarding{overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;scroll-padding:24px;padding:calc(env(safe-area-inset-top) + 28px) 28px calc(env(safe-area-inset-bottom) + 20px);gap:0}
+.welcome-screen>* ,.onboarding>*{flex-shrink:0}
+.entry-brand{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.entry-brand .brand{margin:0}
+.entry-brand>span{font-size:.6875rem;letter-spacing:.08em;color:#b7a8c6}
+.welcome-content{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:8px 0 28px}
+.welcome-ring{width:clamp(100px,19dvh,160px);height:clamp(100px,19dvh,160px);flex:none;margin-bottom:22px;background:radial-gradient(ellipse,rgba(181,135,202,.08),transparent 65%)}
+.welcome-screen h1,.onboarding h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(2rem,8.5vw,2.625rem);line-height:1.14;letter-spacing:-.035em;color:#f6eaf1;margin:0 0 24px;max-width:360px;overflow-wrap:break-word}
+.welcome-lead{font-size:.9375rem;line-height:1.7;color:#c6bccf;max-width:300px;margin:0 0 26px}
+.welcome-reassurance{font-size:.8125rem;line-height:1.85;color:#b8a6c6;margin:0}
+.entry-actions{width:100%}
+.welcome-screen .primary-button,.onboarding .primary-button{font-size:1rem;min-height:56px;height:auto;padding:16px 20px;line-height:1.4;white-space:normal}
+.entry-secondary{display:block;min-height:48px;width:100%;padding:14px 12px;margin-top:6px;border:0;background:transparent;color:#c4b5d0;font-size:.875rem;line-height:1.5}
+.onboarding .entry-brand{margin-bottom:38px}
+.onboarding h1{max-width:320px;margin-bottom:32px}
+.onboarding .field{font-size:.8125rem;letter-spacing:.015em;color:#d0c3db;margin-bottom:10px}
+.onboarding .field span{color:#a99ab6}
+.onboarding .field-input{font-size:1rem;min-height:54px;line-height:1.5;margin-bottom:26px;scroll-margin-block:24px}
+.onboarding .field-input::placeholder{color:#a89ab4}
+.mode-field{border:0;padding:0;margin:0;min-width:0}
+.onboarding .mode-group{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 26px}
+.mode-choice{flex:1 1 130px;position:relative;cursor:pointer}
+.mode-choice input{position:absolute;width:1px;height:1px;opacity:0}
+.mode-choice span{display:flex;align-items:center;justify-content:center;min-height:54px;height:100%;padding:12px 10px;border:1px solid #5a4c66;border-radius:15px;color:#c7b9d1;background:rgba(181,146,219,.04);font-size:.875rem;line-height:1.4;text-align:center}
+.mode-choice input:checked+span{border-color:#c9ace3;color:#f3e7fa;background:rgba(181,146,219,.13)}
+.mode-choice input:focus-visible+span{outline:2px solid #e0c8f4;outline-offset:4px}
+.onboarding p.helper{font-size:.8125rem!important;color:#bfb0cc!important;line-height:1.7;margin:0 0 24px!important}
+.onboarding form{margin:0;flex-shrink:0}
+.onboarding .primary-button{margin-top:0}
+.check-note{text-align:center;color:#b2a6bd;font-size:11px;line-height:1.5;margin:8px 0 0}
+.demo-banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 10px;padding:7px 10px;margin:0 0 10px;border:1px solid #675172;border-radius:14px;background:#201a2b;font-size:11px;color:#cfc0da;flex-shrink:0}
+.demo-banner button{min-height:44px;border:0;background:transparent;color:#f0dbfa;font-size:12px;text-decoration:underline;text-underline-offset:3px;padding:6px 4px}
+.demo-banner .demo-exit{font-size:22px;min-width:44px;text-decoration:none}
+.screen.is-demo{overflow-y:auto}
+.is-demo .home-body{min-height:490px}
+@media(max-height:700px){.welcome-ring{width:100px;height:100px;margin-bottom:14px}.welcome-content{padding-bottom:18px}.welcome-screen h1{margin-bottom:18px}.welcome-lead{margin-bottom:18px}.onboarding .entry-brand{margin-bottom:24px}}
+@media(max-width:350px){.screen.welcome-screen,.screen.onboarding{padding-left:22px;padding-right:22px}.entry-brand>span{font-size:.625rem}}
+
+/* Keep the meaning of the counter visible on compact screens too. */
+.ring-copy .metric-note{display:block}

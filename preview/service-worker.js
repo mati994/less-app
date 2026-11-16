@@ -1,7 +1,7 @@
 /* Offline-Cache nur für diese Vorschau; den Live-Cache nie löschen. */
 const PREFIX='less-preview-';
-const CACHE_NAME=PREFIX+'2026-11-16-storage1';
-const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./icon-512.png","./preview.css?v=20261116-storage1","./styles/base.css","./styles/layout.css?v=20261116-pearl21","./styles/ring.css?v=20261116-pearl21","./src/config.js","./src/storage.js?v=20261116-storage1","./src/ring.js?v=20261116-pearl21","./src/views.js?v=20261116-pearl21","./src/app.js?v=20261116-storage1","./src/register-sw.js"];
+const CACHE_NAME=PREFIX+'2026-11-16-beginning2';
+const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./icon-512.png","./preview.css?v=20261116-beginning2","./styles/base.css","./styles/onboarding.css?v=20261116-beginning2","./styles/layout.css?v=20261116-pearl21","./styles/ring.css?v=20261116-pearl21","./src/config.js","./src/storage.js?v=20261116-beginning2","./src/ring.js?v=20261116-pearl21","./src/views.js?v=20261116-beginning2","./src/app.js?v=20261116-beginning2","./src/register-sw.js"];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });

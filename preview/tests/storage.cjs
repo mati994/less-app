@@ -22,7 +22,7 @@ async function boot(store=new Map([[KEY,original],[LIVE,'untouched']]),options={
     setTimeout(){},clearTimeout(){},performance:{now:()=>0},requestAnimationFrame(){},
     window:{matchMedia:()=>({matches:false})},
     document:{getElementById:id=>id==='app'?root:id==='modal-root'?modal:id==='storage-notice'?notice:fields[id]||null,
-      querySelector:()=>null,addEventListener:(name,fn)=>events[name]=fn,
+      querySelector:sel=>sel==='input[name="mode"]:checked'?{value:state.mode||'reduce'}:null,addEventListener:(name,fn)=>events[name]=fn,
       createElement:()=>({remove(){}}),body:{append:el=>messages.push(el.textContent)}}});
   const modules=new Map();
   function read(file){if(!modules.has(file))modules.set(file,new vm.SourceTextModule(fs.readFileSync(file,'utf8'),{context,identifier:file}));return modules.get(file);}
@@ -41,7 +41,6 @@ const actions={
   'historical negative':app=>app.click({result:'no'}),
   'historical removal':app=>app.click({result:'clear'}),
   'erase all':app=>app.click({action:'erase'}),
-  'demo replacement':app=>app.click({action:'demo'}),
   'new goal':app=>app.submit()
 };
 async function prepare(name,store,options){
@@ -50,7 +49,8 @@ async function prepare(name,store,options){
   if(name==='new goal')app.click({action:'new'});
   return app;
 }
-(async()=>{
+module.exports={boot,fixture,original,KEY,LIVE};
+if(require.main===module)(async()=>{
   for(const [name,act] of Object.entries(actions)){
     for(const fault of ['failWrite','failRead']){
       const app=await prepare(name);
@@ -76,7 +76,7 @@ async function prepare(name,store,options){
       assertions++;
     }
   }
-  for(const name of ['erase all','demo replacement','new goal']){
+  for(const name of ['erase all','new goal']){
     const app=await prepare(name);app.state.confirm=false;actions[name](app);
     assert.equal(app.store.get(KEY),original);assert.equal(app.messages.length,0);assertions++;
   }
@@ -103,7 +103,7 @@ async function prepare(name,store,options){
     for(const [key,v] of Object.entries(value.checkins))assert.equal(after.checkins[key],v);
     assertions++;
   }
-  const fresh=await boot(new Map());assert.equal(fresh.store.has(KEY),false);fresh.click({quickCheck:'no'});assert.ok(fresh.store.has(KEY));assertions++;
+  const fresh=await boot(new Map());assert.equal(fresh.store.has(KEY),false);assert.match(fresh.root.innerHTML,/Du musst nicht alles/);fresh.click({action:'begin'});fresh.submit();assert.ok(fresh.store.has(KEY));assertions++;
   // Two independent app/module instances share the origin's storage.
   for(const [name,act] of Object.entries(actions)){
     const shared=new Map([[KEY,original],[LIVE,'untouched']]);

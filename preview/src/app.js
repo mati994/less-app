@@ -1,9 +1,10 @@
 import {icons,dateKey,safeText} from './config.js';
-import {demoData,load,persist,calculateMetrics,storageIssue} from './storage.js?v=20261116-storage1';
-import {home,history,more,setupHtml} from './views.js?v=20261116-pearl21';
+import {demoData,load,persist,calculateMetrics,storageIssue} from './storage.js?v=20261116-beginning2';
+import {home,history,more,setupHtml,welcomeHtml,demoBanner} from './views.js?v=20261116-beginning2';
 import {ringArcLength,animateRingSvgProgress,finishIntroAnimation,playPearlLight,stopPearlLight} from './ring.js?v=20261116-pearl21';
 
-let data=load(), tab='home', modal=null, toastTimer=null, pendingDate=null, celebratePending=false, suppressAutoRing=false;
+let savedData=load(), data=savedData, demoMode=savedData?.isDemo===true;
+let tab=data?'home':'welcome', modal=null, toastTimer=null, pendingDate=null, celebratePending=false, suppressAutoRing=false;
     const root=document.getElementById('app'), modalRoot=document.getElementById('modal-root');
 const storageMessages={
   invalid:'Deine gespeicherten Daten konnten nicht sicher gelesen werden. Sie bleiben unverändert. Änderungen sind gesperrt. Bitte lösche keine Browserdaten und wende dich an das less.-Team.',
@@ -20,20 +21,44 @@ function storageFeedback(){
 }
 function save(candidate){
   if(!persist(candidate)){toast(storageFeedback());return false;}
-  data=candidate;
+  savedData=data=candidate;
+  demoMode=false;
   storageFeedback();
   return true;
 }
-function metrics(){return calculateMetrics(data)}
-let formMode='abstain';
-function setup(){stopPearlLight(root);tab='setup';root.innerHTML=setupHtml()}
+function saveCheckin(candidate){
+  // Demo interactions are ephemeral. They never touch the personal storage path.
+  if(demoMode){data={...candidate,isDemo:true};return true;}
+  return save(candidate);
+}
+function hasPersonal(){return !!savedData && savedData.isDemo!==true;}
+function metrics(){return calculateMetrics(data || {checkins:{}})}
+let setupReturn='welcome';
+function focusHeading(){root.querySelector('h1')?.focus?.({preventScroll:true});}
+function setup(){stopPearlLight(root);tab='setup';root.innerHTML=setupHtml(setupReturn);root.scrollTop=0;focusHeading();}
+function showHome(){
+  tab='home';suppressAutoRing=true;
+  try{render()}finally{suppressAutoRing=false}
+}
+function leaveDemo(){
+  demoMode=false;data=savedData;
+  if(hasPersonal())showHome();
+  else {data=null;tab='welcome';render();}
+  focusHeading();
+}
 
 function render(){
       stopPearlLight(root);
+      root.scrollTop=0;
       const oldRing=root.querySelector('.orbit .ring-arc');
       const previousArc=oldRing?Number(oldRing.getAttribute('data-arc')):null;
+      if(tab==='welcome'){root.innerHTML=welcomeHtml();return;}
       if(tab==='setup'){setup();return}
-      root.innerHTML=tab==='history'?history(data,metrics,tab):tab==='more'?more(tab):home(data,metrics,tab);
+      root.innerHTML=tab==='history'?history(data,metrics,tab):tab==='more'?more(tab,demoMode,hasPersonal()):home(data,metrics,tab);
+      if(demoMode){
+        root.querySelector('.screen')?.classList?.add('is-demo');
+        root.querySelector('.screen')?.insertAdjacentHTML?.('afterbegin',demoBanner(hasPersonal()));
+      }
       const page=root.querySelector('.screen');
       if(tab==='history'||tab==='more'){
         page.classList.add('screen-'+tab);
@@ -66,29 +91,29 @@ function render(){
     function toast(message){document.querySelector('.toast')?.remove();const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.append(el);clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.remove(),2600)}
     document.addEventListener('click',e=>{
       const btn=e.target.closest('button');if(!btn){if(e.target.id==='sheet-overlay')closeSheet();return}
-      if(btn.dataset.tab){tab=btn.dataset.tab;render();return}
-      if(btn.dataset.quickCheck){
+      if(btn.dataset.tab && data){tab=btn.dataset.tab;render();return}
+      if(btn.dataset.quickCheck && data){
         const today=dateKey(new Date()),value=btn.dataset.quickCheck;
         if(value!=='yes'&&value!=='no')return;
         const from=metrics().yes;
         const candidate={...data,isDemo:false,checkins:{...data.checkins,[today]:value}};
-        if(!save(candidate))return;
+        if(!saveCheckin(candidate))return;
         const to=metrics().yes;
         suppressAutoRing=true;
         try{render()}finally{suppressAutoRing=false}
         animateRingSvgProgress(root,from,to);
         if(value==='yes')playPearlLight(root);
-        toast(value==='yes'?'Für heute gespeichert.':'Heute festgehalten. Morgen ist ein neuer Tag.');
+        toast(demoMode?'In der Demo ausprobiert.':value==='yes'?'Für heute gespeichert.':'Heute festgehalten. Morgen ist ein neuer Tag.');
         return;
       }
-      if(btn.dataset.day){checkin(btn.dataset.day);return}
+      if(btn.dataset.day && data){checkin(btn.dataset.day);return}
       if(btn.dataset.result){
         const value=btn.dataset.result,date=pendingDate;
         if(!date)return;
         if(!['yes','no','clear'].includes(value))return;
         const candidate={...data,isDemo:false,checkins:{...data.checkins}};
         if(value==='clear')delete candidate.checkins[date];else candidate.checkins[date]=value;
-        if(!save(candidate))return;
+        if(!saveCheckin(candidate))return;
         closeSheet();
         render();
         if(value==='clear')toast('Eintrag entfernt');
@@ -98,22 +123,25 @@ function render(){
         }
         return;
       }
-      if(btn.dataset.mode){formMode=btn.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('selected',x.dataset.mode===formMode));document.getElementById('habit-goal').placeholder=formMode==='reduce'?'z. B. Maximal 30 Minuten pro Tag':'z. B. Jeden Tag ohne Zigarette';return}
       switch(btn.dataset.action){
         case 'close':closeSheet();break;
-        case 'back':tab='home';render();break;
-        case 'new':formMode='abstain';setup();break;
+        case 'back':tab=setupReturn;render();focusHeading();break;
+        case 'begin':
+          if(demoMode && hasPersonal()){leaveDemo();break;}
+          setupReturn=tab==='welcome'?'welcome':'home';setup();break;
+        case 'new':setupReturn='home';setup();break;
+        case 'leave-demo':leaveDemo();break;
         case 'demo':
-          if(!confirm('Die bisherigen Einträge werden durch Beispieldaten ersetzt. Fortfahren?'))return;
-          if(!save(demoData()))return;
-          tab='home';render();toast('Demo geladen');
+          if(storageIssue()){toast(storageFeedback());return;}
+          demoMode=true;data=demoData();showHome();focusHeading();
           break;
         case 'erase':
           if(!confirm('Alle Einträge wirklich löschen?'))return;
-          if(!save({...data,checkins:{},isDemo:false}))return;
+          if(!data || !saveCheckin({...data,checkins:{},isDemo:false}))return;
           tab='home';render();toast('Einträge gelöscht');
           break;
         case 'export':{
+          if(demoMode){toast('Demo-Einträge sind nur zum Ausprobieren.');return;}
           // Never export the unavailable-data placeholder as a personal backup.
           if(['invalid','read','conflict'].includes(storageIssue())){toast(storageFeedback());return;}
           const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -129,15 +157,24 @@ function render(){
       e.preventDefault();
       const habit=document.getElementById('habit-name').value.trim();
       const goal=document.getElementById('habit-goal').value.trim();
-      if(!habit)return;
-      const hadRecords=Object.keys(data.checkins).length;
-      if(hadRecords&&!confirm('Damit beginnt ein neues Ziel. Die bisherigen Einträge werden ersetzt. Weiter?'))return;
-      if(!save({isDemo:false,habit,goal,mode:formMode,created:dateKey(new Date()),checkins:{}}))return;
-      tab='home';render();toast('Dein neues Ziel ist bereit');
+      const nameField=document.getElementById('habit-name');
+      nameField.setCustomValidity?.(habit?'':'Bitte gib deinen Fokus ein.');
+      if(!habit){nameField.reportValidity?.();return;}
+      const mode=document.querySelector('input[name="mode"]:checked')?.value;
+      if(!['reduce','abstain'].includes(mode))return;
+      const hadRecords=savedData && Object.keys(savedData.checkins).length;
+      if(hadRecords&&!confirm(savedData.isDemo===true
+        ?'Dein bisher gespeicherter Demo-Stand wird durch dein neues Ziel ohne Einträge ersetzt. Fortfahren?'
+        :'Damit beginnt ein neues Ziel. Die bisherigen Einträge werden ersetzt. Weiter?'))return;
+      if(!save({isDemo:false,habit,goal,mode,created:dateKey(new Date()),checkins:{}}))return;
+      showHome();focusHeading();toast('Dein neues Ziel ist bereit');
     });
+    document.addEventListener('input',e=>{if(e.target.id==='habit-name')e.target.setCustomValidity('');});
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
     storageFeedback();
     render(); // Beim Start nur lesen. Erst nach einer Nutzeraktion speichern.
 const splash=document.getElementById('splash'),appShell=document.getElementById('app');
     const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-setTimeout(()=>finishIntroAnimation({splash,appShell,root,metrics,reduceMotion}),reduceMotion?100:1400);
+if(tab==='welcome'){
+  splash?.remove();appShell?.classList?.remove('booting','morphing');
+}else setTimeout(()=>finishIntroAnimation({splash,appShell,root,metrics,reduceMotion}),reduceMotion?100:1400);

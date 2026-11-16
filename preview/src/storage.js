@@ -26,7 +26,7 @@ export function load(){
   baseline=undefined;blocked=null;issue=null;
   try {
     baseline=localStorage.getItem(KEY) ?? null;
-    if(baseline===null)return demoData();
+    if(baseline===null)return null;
     const value=JSON.parse(baseline);
     if(validData(value))return value;
     blocked=issue='invalid';
