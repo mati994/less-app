@@ -1,11 +1,29 @@
 import {icons,dateKey,safeText} from './config.js';
-import {demoData,load,persist,calculateMetrics} from './storage.js';
+import {demoData,load,persist,calculateMetrics,storageIssue} from './storage.js?v=20261116-storage1';
 import {home,history,more,setupHtml} from './views.js?v=20261116-pearl21';
 import {ringArcLength,animateRingSvgProgress,finishIntroAnimation,playPearlLight,stopPearlLight} from './ring.js?v=20261116-pearl21';
 
 let data=load(), tab='home', modal=null, toastTimer=null, pendingDate=null, celebratePending=false, suppressAutoRing=false;
     const root=document.getElementById('app'), modalRoot=document.getElementById('modal-root');
-function save(){if(!persist(data))toast('Speichern ist in diesem Browser nicht möglich.')}
+const storageMessages={
+  invalid:'Deine gespeicherten Daten konnten nicht sicher gelesen werden. Sie bleiben unverändert. Änderungen sind gesperrt. Bitte lösche keine Browserdaten und wende dich an das less.-Team.',
+  read:'Der lokale Speicher ist nicht erreichbar. Es wurde nichts geändert. Bitte prüfe den Browserzugriff und lade die Seite neu.',
+  conflict:'Die gespeicherten Daten wurden zwischenzeitlich geändert, möglicherweise in einem anderen Tab. Deine Änderung wurde nicht gespeichert. Bitte lade die Seite neu.',
+  write:'Die Änderung konnte nicht gespeichert werden. Deine bisherigen Daten bleiben erhalten. Bitte versuche es erneut.',
+  candidate:'Die Änderung enthält unerwartete Daten und wurde nicht gespeichert.'
+};
+function storageFeedback(){
+  const message=storageMessages[storageIssue()] || '';
+  const notice=document.getElementById('storage-notice');
+  if(notice){notice.textContent=message;notice.hidden=!message;}
+  return message;
+}
+function save(candidate){
+  if(!persist(candidate)){toast(storageFeedback());return false;}
+  data=candidate;
+  storageFeedback();
+  return true;
+}
 function metrics(){return calculateMetrics(data)}
 let formMode='abstain';
 function setup(){stopPearlLight(root);tab='setup';root.innerHTML=setupHtml()}
@@ -52,15 +70,9 @@ function render(){
       if(btn.dataset.quickCheck){
         const today=dateKey(new Date()),value=btn.dataset.quickCheck;
         if(value!=='yes'&&value!=='no')return;
-        const previous=data.checkins[today],wasDemo=data.isDemo,from=metrics().yes;
-        data.checkins[today]=value;
-        data.isDemo=false;
-        if(!persist(data)){
-          if(previous===undefined)delete data.checkins[today];else data.checkins[today]=previous;
-          data.isDemo=wasDemo;
-          toast('Der Eintrag konnte nicht gespeichert werden.');
-          return;
-        }
+        const from=metrics().yes;
+        const candidate={...data,isDemo:false,checkins:{...data.checkins,[today]:value}};
+        if(!save(candidate))return;
         const to=metrics().yes;
         suppressAutoRing=true;
         try{render()}finally{suppressAutoRing=false}
@@ -73,15 +85,10 @@ function render(){
       if(btn.dataset.result){
         const value=btn.dataset.result,date=pendingDate;
         if(!date)return;
-        const previous=data.checkins[date],wasDemo=data.isDemo;
-        if(value==='clear')delete data.checkins[date];else data.checkins[date]=value;
-        data.isDemo=false;
-        if(!persist(data)){
-          if(previous===undefined)delete data.checkins[date];else data.checkins[date]=previous;
-          data.isDemo=wasDemo;
-          toast('Der Eintrag konnte nicht gespeichert werden.');
-          return;
-        }
+        if(!['yes','no','clear'].includes(value))return;
+        const candidate={...data,isDemo:false,checkins:{...data.checkins}};
+        if(value==='clear')delete candidate.checkins[date];else candidate.checkins[date]=value;
+        if(!save(candidate))return;
         closeSheet();
         render();
         if(value==='clear')toast('Eintrag entfernt');
@@ -92,10 +99,44 @@ function render(){
         return;
       }
       if(btn.dataset.mode){formMode=btn.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('selected',x.dataset.mode===formMode));document.getElementById('habit-goal').placeholder=formMode==='reduce'?'z. B. Maximal 30 Minuten pro Tag':'z. B. Jeden Tag ohne Zigarette';return}
-      switch(btn.dataset.action){case 'close':closeSheet();break;case 'back':tab='home';render();break;case 'new':formMode='abstain';setup();break;case 'demo':if(confirm('Die bisherigen Einträge werden durch Beispieldaten ersetzt. Fortfahren?')){data=demoData();save();tab='home';render();toast('Demo geladen')}break;case 'erase':if(confirm('Alle Einträge wirklich löschen?')){data.checkins={};data.isDemo=false;save();tab='home';render();toast('Einträge gelöscht')}break;case 'export':{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='less-meine-daten.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Datenexport gestartet');break}}
+      switch(btn.dataset.action){
+        case 'close':closeSheet();break;
+        case 'back':tab='home';render();break;
+        case 'new':formMode='abstain';setup();break;
+        case 'demo':
+          if(!confirm('Die bisherigen Einträge werden durch Beispieldaten ersetzt. Fortfahren?'))return;
+          if(!save(demoData()))return;
+          tab='home';render();toast('Demo geladen');
+          break;
+        case 'erase':
+          if(!confirm('Alle Einträge wirklich löschen?'))return;
+          if(!save({...data,checkins:{},isDemo:false}))return;
+          tab='home';render();toast('Einträge gelöscht');
+          break;
+        case 'export':{
+          // Never export the unavailable-data placeholder as a personal backup.
+          if(['invalid','read','conflict'].includes(storageIssue())){toast(storageFeedback());return;}
+          const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+          const url=URL.createObjectURL(blob),a=document.createElement('a');
+          a.href=url;a.download='less-meine-daten.json';a.click();
+          setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Datenexport gestartet');
+          break;
+        }
+      }
     });
-    document.addEventListener('submit',e=>{if(e.target.id!=='habit-form')return;e.preventDefault();const habit=document.getElementById('habit-name').value.trim(),goal=document.getElementById('habit-goal').value.trim();if(!habit)return;const hadRecords=Object.keys(data.checkins).length;if(hadRecords&&!confirm('Damit beginnt ein neues Ziel. Die bisherigen Einträge werden ersetzt. Weiter?'))return;data={isDemo:false,habit,goal,mode:formMode,created:dateKey(new Date()),checkins:{}};save();tab='home';render();toast('Dein neues Ziel ist bereit')});
+    document.addEventListener('submit',e=>{
+      if(e.target.id!=='habit-form')return;
+      e.preventDefault();
+      const habit=document.getElementById('habit-name').value.trim();
+      const goal=document.getElementById('habit-goal').value.trim();
+      if(!habit)return;
+      const hadRecords=Object.keys(data.checkins).length;
+      if(hadRecords&&!confirm('Damit beginnt ein neues Ziel. Die bisherigen Einträge werden ersetzt. Weiter?'))return;
+      if(!save({isDemo:false,habit,goal,mode:formMode,created:dateKey(new Date()),checkins:{}}))return;
+      tab='home';render();toast('Dein neues Ziel ist bereit');
+    });
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+    storageFeedback();
     render(); // Beim Start nur lesen. Erst nach einer Nutzeraktion speichern.
 const splash=document.getElementById('splash'),appShell=document.getElementById('app');
     const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
