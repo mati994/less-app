@@ -15,10 +15,14 @@ export function playPearlLight(root){
   // Read geometry once; every light layer then moves through transform/opacity.
   const bounds=root.getBoundingClientRect();
   if(!bounds.width||!bounds.height)return;
-  const ring=root.querySelector('.ring-stage')?.getBoundingClientRect();
+  const stage=root.querySelector('.ring-stage');
+  const ring=stage?.getBoundingClientRect();
   const x=ring ? ring.left+ring.width/2-bounds.left : bounds.width/2;
   const y=ring ? ring.top+ring.height/2-bounds.top : bounds.height*.42;
   const radius=Math.hypot(Math.max(x,bounds.width-x),Math.max(y,bounds.height-y));
+  // 130 is the contour radius in the existing 400-unit SVG viewBox.
+  const sourceRadius=ring ? ring.width*130/400 : 192*.68*.12;
+  const launchDelay=ring ? 130 : 0;
   const effect=document.createElement('div');
   effect.className='pearl-light';
   effect.setAttribute('aria-hidden','true');
@@ -28,14 +32,16 @@ export function playPearlLight(root){
   effect.style.setProperty('--pearl-x',x+'px');
   effect.style.setProperty('--pearl-y',y+'px');
   effect.style.setProperty('--pearl-scale',String(radius/(192*.68)));
+  effect.style.setProperty('--pearl-start-scale',String(sourceRadius/(192*.68)));
+  effect.style.setProperty('--pearl-launch-delay',launchDelay+'ms');
   effect.style.setProperty('--pearl-duration','2350ms');
 
   // Approximate the crest's cubic ease-out arrival at each edge. The small
   // overlap lets the broad wave brighten the edge before its centre arrives.
   const distances={left:x,right:bounds.width-x,top:y,bottom:bounds.height-y};
   for(const [side,distance] of Object.entries(distances)){
-    const fraction=Math.min(1,Math.max(0,distance/radius));
-    const arrival=1950*(1-Math.cbrt(1-fraction));
+    const fraction=Math.min(1,Math.max(0,(distance-sourceRadius)/(radius-sourceRadius)));
+    const arrival=launchDelay+(1950-launchDelay)*(1-Math.cbrt(1-fraction));
     effect.style.setProperty('--pearl-'+side+'-delay',Math.max(0,arrival-70)+'ms');
   }
 
@@ -44,6 +50,7 @@ export function playPearlLight(root){
     if(pearlAnimations.get(root)!==stop)return;
     clearTimeout(timeout);
     effect.remove();
+    stage?.classList.remove('pearl-emitting');
     motion.removeEventListener('change',stop);
     document.removeEventListener('visibilitychange',stop);
     window.removeEventListener('pagehide',stop);
@@ -60,6 +67,7 @@ export function playPearlLight(root){
   pearlAnimations.set(root,stop);
   // Also clean up when CSS animations are interrupted or animationend is lost.
   timeout=setTimeout(stop,2450);
+  stage?.classList.add('pearl-emitting');
   root.append(effect);
 }
 

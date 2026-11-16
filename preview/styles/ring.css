@@ -18,6 +18,38 @@
   background:radial-gradient(circle,rgba(196,148,225,.18),rgba(129,88,171,.08) 42%,transparent 70%);
 }
 
+/* The SVG bloom is decoded into small images once, not filtered on each
+   progress frame. Opacity alone releases the contour light into the wave. */
+.ring-light{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+.ring-aura{opacity:.55}
+.ring-emission{opacity:0}
+.app.morphing .ring-light{visibility:hidden}
+.pearl-emitting .ring-aura{
+  will-change:opacity;
+  animation:pearlRingAura 1050ms ease-out both;
+}
+.pearl-emitting .ring-emission{
+  will-change:opacity;
+  animation:pearlRingEmission 900ms ease-out both;
+}
+@keyframes pearlRingAura{
+  0%,100%{opacity:.55}
+  15%{opacity:.94}
+  42%{opacity:.76}
+}
+@keyframes pearlRingEmission{
+  0%,100%{opacity:0}
+  15%{opacity:.86}
+  35%{opacity:.52}
+  65%{opacity:.15}
+}
+
 /* Two small, pre-painted textures. Only uniform scale and opacity animate. */
 .pearl-light{
   position:absolute;
@@ -45,8 +77,10 @@
     radial-gradient(ellipse 32% 42% at 70% 54%,rgba(213,191,255,.39),rgba(228,190,242,.12) 46%,transparent 80%),
     radial-gradient(ellipse 40% 24% at 49% 70%,rgba(250,209,231,.22),transparent 75%),
     radial-gradient(circle closest-side,transparent 22%,rgba(218,185,241,.04) 37%,rgba(240,203,229,.17) 53%,rgba(255,239,230,.24) 66%,rgba(226,202,254,.11) 76%,transparent 96%);
-  animation:pearlSpread 1950ms cubic-bezier(.215,.61,.355,1) both,
-            pearlWaveFade 1950ms linear both;
+  -webkit-mask-image:radial-gradient(circle closest-side,transparent 44%,rgba(0,0,0,.2) 53%,#000 64%);
+  mask-image:radial-gradient(circle closest-side,transparent 44%,rgba(0,0,0,.2) 53%,#000 64%);
+  animation:pearlSpread calc(1950ms - var(--pearl-launch-delay)) var(--pearl-launch-delay) cubic-bezier(.215,.61,.355,1) both,
+            pearlWaveFade calc(1950ms - var(--pearl-launch-delay)) var(--pearl-launch-delay) linear both;
 }
 
 .pearl-depth{
@@ -54,8 +88,8 @@
     radial-gradient(ellipse 38% 29% at 62% 33%,rgba(255,240,226,.28),rgba(247,203,224,.09) 47%,transparent 82%),
     radial-gradient(ellipse 31% 36% at 34% 65%,rgba(210,182,252,.25),rgba(237,187,225,.08) 46%,transparent 83%),
     radial-gradient(circle closest-side,transparent 28%,rgba(233,188,221,.09) 46%,rgba(251,222,233,.15) 61%,transparent 91%);
-  animation:pearlSpread 2160ms 120ms cubic-bezier(.215,.61,.355,1) both,
-            pearlDepthFade 2160ms 120ms linear both;
+  animation:pearlSpread calc(2160ms - var(--pearl-launch-delay)) calc(120ms + var(--pearl-launch-delay)) cubic-bezier(.215,.61,.355,1) both,
+            pearlDepthFade calc(2160ms - var(--pearl-launch-delay)) calc(120ms + var(--pearl-launch-delay)) linear both;
 }
 
 /* Narrow edge surfaces retain a bright hairline with a 22px inward falloff. */
@@ -92,7 +126,7 @@
   50%{transform:scale(1.005);opacity:1}
 }
 @keyframes pearlSpread{
-  from{transform:scale(.12)}
+  from{transform:scale(var(--pearl-start-scale))}
   to{transform:scale(var(--pearl-scale))}
 }
 @keyframes pearlWaveFade{
@@ -117,5 +151,6 @@
 
 @media(prefers-reduced-motion:reduce){
   .ring-stage .orbit{animation:none}
+  .pearl-emitting .ring-aura,.pearl-emitting .ring-emission{animation:none;will-change:auto}
   .pearl-light{display:none}
 }

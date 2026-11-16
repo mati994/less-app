@@ -1,51 +1,55 @@
-# Pearl Light 2.0 – Prüfergebnis
+# Pearl Light 2.1 – Prüfergebnis
 
-Stand 16. November 2026, Branch `codex/pearl-light-iphone`. Ausgangspunkt war Commit `d31d68ce856d57a22762d47a85376df4190b40da`.
+Stand 16. November 2026. Branch `codex/pearl-light-iphone`, Ausgangspunkt `7cfbe283c1b293c5f31cc2ef37cbc2049c79a797`.
 
-## Umsetzung
+## Befund und Änderung
 
-Die Woge besteht aus zwei kleinen, statisch gezeichneten Verlaufsebenen mit leicht versetztem Ablauf. Pfirsich, Rosé und Lavendel überlagern sich zu einem breiten Lichtvolumen. Beide Ebenen skalieren gleichmäßig. Die Randflächen sind schmal und laufen von einer etwa 1 px hellen Kante über 22 px weich nach innen aus. Ihr Einsatz wird aus dem Abstand zum Wogenzentrum berechnet. Die Gesamtwirkung dauert 2,35 Sekunden.
+In der ersten Pearl-Light-Optimierung war die CSS-Zuweisung `filter:url(#trueBloom)` am sichtbaren Dashboard-Ring entfernt worden. Die Filterdefinition blieb zwar im SVG, wurde dort aber nicht angewendet. Die Woge startete außerdem mit einer festen Skalierung von 0,12 und war dadurch erheblich kleiner als die sichtbare Ringkontur.
 
-Während des Lichteffekts animieren ausschließlich Skalierung und Deckkraft. Es gibt keine Canvas-Neuzeichnungen, animierten Filter oder wiederholten Layoutmessungen für die Woge. Die bestehende SVG-Fortschrittsanzeige aktualisiert ihren Bogen weiterhin während des Zahlenlaufs. GPU-Compositing und Bildrate hängen vom Browser und Gerät ab und wurden auf iOS noch nicht gemessen.
+Der originale Bloom wird jetzt in einer separaten SVG-Bildfläche untergebracht. Die statische Bildfläche übernimmt dieselbe Geometrie und denselben Farbverlauf wie der Fortschrittsring. Sie bleibt im Ruhezustand dezent sichtbar. Eine zweite, ebenfalls statische Bildfläche hellt die offene Kontur beim positiven Check-in kurz auf. Beide Lichtflächen werden ausschließlich über ihre Deckkraft animiert. Der SVG-Zahlenlauf bleibt separat und verändert die Glow-Bilder nicht in jedem Frame.
 
-Neue Eingaben, Navigation, Größenwechsel, Hintergrundwechsel und Änderungen der Bewegungseinstellung räumen den Effekt samt Listenern auf. Ein verzögertes Ende eines älteren Effekts kann einen neu gestarteten Effekt nicht entfernen. Ein zusätzlicher Zeitablauf beendet auch unterbrochene CSS-Animationen.
+Die Woge beginnt auf der Heute-Ansicht am gemessenen Ringradius, berechnet aus 130 Einheiten Radius im bestehenden 400er-SVG. Der Konturimpuls erreicht nach etwa 130 ms seine größte Helligkeit. Gleichzeitig setzt die Woge ein. Eine statische, weich auslaufende Innenmaske der ersten Wogenschicht hält den Start an der Kontur. Die zweite Perlmutt-Schicht bewahrt das weiche Lichtvolumen. Die beiden bisherigen Farbverläufe und die Gestaltung des dünnen Randglows werden weiterverwendet. Die Randzeitpunkte berücksichtigen nun den größeren Startdurchmesser.
 
-Die Speicherlogik verwendet die bisherigen Datenformate und Schlüssel. Zusätzlich ist die Cache-Suche auf den aktuellen Vorschau-Cache beschränkt. Erfolgreiche Online-Antworten bleiben auch bei einem fehlgeschlagenen Cache-Schreibvorgang nutzbar. Service Worker können für den lokalen Test auch auf einem sicheren Loopback-Ursprung registriert werden.
+Die Woge endet nach 1,95 Sekunden, die Tiefenschicht nach 2,28 Sekunden und der Rand nach 2,35 Sekunden. Der Ring kehrt innerhalb von etwa einer Sekunde zu seinem Ruheglow zurück. Der Konturimpuls ist an den sichtbaren Ring auf Heute gebunden. Die Bestätigung im Verlauf behält ihren bisherigen Ablauf mit Woge nach dem Schließen des Ergebnisses.
+
+## Performance und Daten
+
+- Die zusätzlichen Ringlichtflächen sind kleine, eigenständige SVG-Bilder. Ihre Filterparameter bleiben konstant. Während des Impulses wird ihre Deckkraft verändert.
+- Die bestehende Woge animiert weiter nur gleichmäßige Skalierung und Deckkraft. Die Innenmaske wird statisch festgelegt. Die Geometrie wird einmal beim Auslösen gelesen.
+- Die bestehende Aufräumlogik entfernt auch den Ringimpuls bei Navigation, Größenwechsel, Hintergrundwechsel, reduzierter Bewegung und erneutem Auslösen.
+- Speicherung, Datenschema und Schlüssel bleiben unverändert. Der Effekt startet nach erfolgreichem positivem Speichern.
+- App-Assets sind mit `20261116-pearl21` versioniert. Der aktuelle Vorschau-Cache heißt `less-preview-2026-11-16-pearl21`.
 
 ## Tatsächlich geprüft
 
-| Prüfung | Methode und Ergebnis |
+| Prüfung | Ergebnis |
 | --- | --- |
-| JavaScript-Syntax und Diff | Node-Syntaxprüfung, `git diff --check`, Kontrolle der geänderten Pfade bestanden. |
-| Vorhandene Check-ins | Browser-Test mit gespeicherten Beispieldaten. Initialisierung ließ den gespeicherten Datensatz bytegleich, ältere Einträge blieben bei neuen Check-ins erhalten. |
-| Positiv, negativ, mehrfach | Im Chromium-Browser bestanden. Positiv startet nach Speicherung, negativ erzeugt keine Woge, wiederholtes Tippen zählt denselben Tag nur einmal. |
-| Speicherfehler | Schreibfehler im Browser simuliert. Fehlermeldung sichtbar, vorheriger Status blieb bestehen, keine positive Woge gestartet. |
-| Verlauf und Reload | Änderung über das Dialogfenster, Abschluss über den Schließen-Button und Reload im Browser bestanden. Escape wurde zusätzlich im Node-Test geprüft. |
-| Bewegung und Aufräumen | Reduzierte Bewegung im Browser simuliert. Check-in gespeichert, Woge unterdrückt. Navigation und Größenwechsel entfernten den Effekt. Echter iOS-Einstellungswechsel steht aus. |
-| Offline | Vorschau-Server nach erfolgreicher Cache-Installation gestoppt. Die App ließ sich im Chromium-Browser erneut laden. Negativer Check-in blieb nach Reload erhalten, anschließender positiver Check-in funktionierte. |
-| Cache-Update und Trennung | Node-Test prüft Installation, Entfernen alter Vorschau-Caches, Erhalt eines Live-Cache-Fixtures, Scope-Grenzen und fehlenden Zugriff auf fremde Cache-Inhalte. |
-| Netzwerk- und Cachefehler | Node-Test prüft Offline-Fallback, HTTP-503 mit vorhandenem Cache und fehlgeschlagenes Cache-Schreiben bei erfolgreicher Online-Antwort. |
-| Layout und Lichtwirkung | Im Chromium-Browser bei 390 × 844 CSS-Pixeln visuell geprüft. Bei 320 × 568 Pixeln sind beide Check-in-Tasten und die Navigation im sichtbaren Bereich. |
-| Daten- und Live-Grenzen | Node- und Browser-Test prüfen den unveränderten Live-Speicherschlüssel. Der Git-Diff dieser Phase enthält ausschließlich Dateien unter `preview/`. |
+| Syntax und Git-Diff | Node-Syntaxprüfung und `git diff --check` bestanden. Änderungen dieser Phase liegen ausschließlich unter `preview/`. |
+| Vorhandene Daten | Browser-Fixture blieb beim Start bytegleich. Frühere Einträge und Live-Speicherschlüssel blieben erhalten. |
+| Ringbilder und Ruheglow | Beide eingebetteten SVG-Bilder wurden im Chromium-Browser geladen. Ruheglow vor und nach dem Impuls mit Deckkraft 0,55 bestätigt. |
+| Wogenursprung | Im Browser und Node-Test geprüft, dass Startskalierung und tatsächlicher Ringradius übereinstimmen. |
+| Positiv und Wiederholung | Ringimpuls und Woge starten nach Speicherung. Schnelles Wiederholen erzeugt genau einen Effekt und keine doppelt gezählten Tage. |
+| Negativ und Speicherfehler | Negativer Check-in bleibt ohne Woge. Simulierter Schreibfehler erzeugt keinen positiven Effekt und bewahrt den vorherigen Status. |
+| Verlauf, Reload, Navigation | Bestehender Bestätigungsablauf, Datenerhalt und vollständiges Aufräumen im Browser bestanden. |
+| Reduzierte Bewegung | Im Browser simuliert. Woge und Konturimpuls unterdrückt, Speicherung erfolgreich. |
+| Offline | Vorschau-Server gestoppt und App erneut geladen. Negativer Check-in vorhanden, beide Glow-Bilder geladen, positiver Check-in gespeichert und nach weiterem Reload vorhanden. |
+| Cache-Grenzen und Fehler | Bestehender Node-Test für Installation, Vorschau-Cache-Update, Live-Cache-Erhalt, Scope-Grenzen, HTTP-Fehler und Cache-Schreibfehler bestanden. |
+| Darstellung | Ruheglow und eingefrorene Animationsphasen bei 390 × 844 CSS-Pixeln geprüft. Bei 320 × 568 Pixeln liegen Check-in-Tasten und Navigation im sichtbaren Bereich. |
 
-Die Browserprüfungen liefen in der internen Vorschau auf einem eigenen lokalen Ursprung mit Testdaten. Die reduzierte Bewegung wurde durch die Testumgebung simuliert. Die Node-Tests arbeiten mit vereinfachten DOM- und Cache-Schnittstellen. Sie ergänzen den Browser-Test.
+Die Node-Tests arbeiten mit simulierten DOM- und Cache-Schnittstellen. Browserprüfungen liefen mit isolierten Testdaten in Chromium. Ein echter Wechsel der iOS-Bewegungseinstellung und Frame-Pacing auf einem iPhone wurden für 2.1 noch nicht geprüft.
 
 ## Momentaufnahmen
 
-Die CSS-Animationen wurden für diese Aufnahmen bei der angegebenen Zeit angehalten. Die Bilder zeigen den tatsächlichen Browser-Render der Testversion.
+Die beiden Impulsaufnahmen wurden bei der angegebenen Zeit angehalten. Es handelt sich um tatsächliche Browser-Renderings.
 
-| Lichtwoge bei 650 ms | Übergang zum Rand bei 1100 ms |
-| --- | --- |
-| ![Lichtwoge](tests/pearl-light-2-wave.jpg) | ![Randglow](tests/pearl-light-2-edge.jpg) |
+| Ruheglow | Konturimpuls bei 130 ms | Woge bei 650 ms |
+| --- | --- | --- |
+| ![Ruheglow](tests/pearl-21-rest.jpg) | ![Konturimpuls](tests/pearl-21-impulse.jpg) | ![Woge](tests/pearl-21-wave.jpg) |
 
-## Noch offen
+## Gerätetest und private Site
 
-- Echte iPhone-Bildrate und Frame-Pacing unter iOS Safari, auch bei Stromsparmodus und wiederholten Check-ins.
-- Wirkung auf dem iPhone-Display mit Safari-Leisten, Safe Areas, Displayrundungen und als Homescreen-PWA.
-- Echter Wechsel von „Bewegung reduzieren“, Hintergrundwechsel und Orientierung auf iOS.
-- Vollständiger Offline-Start und Aktualisierung einer vorhandenen Vorschau-PWA auf dem iPhone über HTTPS.
-- Ausführung des Windows-Startskripts auf Windows. Der Skriptinhalt wurde geprüft.
+Matis hat für Pearl Light 2.0 auf einem echten iPhone flüssige Animation, eine schöne Perlmutt-Woge, einen gelungenen Übergang zum Rand und zuverlässiges wiederholtes Auslösen bestätigt. Für 2.1 steht die Bestätigung der neuen Ringanbindung und der weiterhin flüssigen Darstellung auf diesem Gerät aus.
 
-## Testadresse
+Die bestehende private Test-Site wird mit diesem Stand aktualisiert. Für den Test in Safari die [Testadresse](https://less-pearl-light-matis.ein-schmuh.chatgpt.site/) neu laden. Der Seitentitel nennt `Pearl Light 2.1 Test`. Bei einem bereits geöffneten älteren Stand nach kurzer Wartezeit nochmals laden. Die gespeicherten Testeinträge bleiben auf demselben Ursprung.
 
-Die interne Vorschau ist eine Entwicklungsumgebung und keine bereitgestellte iPhone-HTTPS-Adresse. Die sichere lokale Alternative ist in [README.md](README.md) beschrieben. Eine separate Hosting-Einrichtung braucht gemäß Auftrag eine Freigabe. Eine Live-Veröffentlichung wurde nicht durchgeführt.
+Zu prüfen sind besonders die ersten 300 ms, der Übergang vom aufgehellten Ring in die Woge, die Rückkehr zum Ruheglow und schnelles Wiederholen. Die Freigabe von 2.0 ersetzt diesen neuen iPhone-Test nicht.

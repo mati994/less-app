@@ -1,5 +1,5 @@
 import {icons, safeText, dateKey, shifted, weekdayShort} from './config.js';
-import {ringArcLength} from './ring.js?v=20261116-pearl2';
+import {ringArcLength} from './ring.js?v=20261116-pearl21';
 
 export function logo(){return `<div class="brand"><svg class="brandmark" viewBox="0 0 36 36" fill="none"><defs><linearGradient id="markgrad" x1="0" y1="0" x2="36" y2="36"><stop stop-color="#e8cfca"/><stop offset="1" stop-color="#aa90dd"/></linearGradient></defs><circle cx="18" cy="18" r="13" stroke="url(#markgrad)" stroke-width="3.2" stroke-dasharray="63 19" transform="rotate(-65 18 18)"/></svg>less.</div>`}
     export function header(){return `<header class="brandrow">${logo()}<button class="iconbutton" aria-label="Einstellungen" data-tab="more">${icons.settings}</button></header>`}
@@ -22,10 +22,21 @@ export function logo(){return `<div class="brand"><svg class="brandmark" viewBox
         '</filter></defs>'+
         '<circle class="ring-arc" cx="200" cy="200" r="130" transform="rotate(-98 200 200)" stroke-dasharray="'+arc+' '+total+'" data-arc="'+arc+'"/>'+
         '</svg>';
+      // Separate image surfaces keep the bloom independent of per-frame SVG arc updates.
+      const glowSource='data:image/svg+xml,'+encodeURIComponent(ringSvg.replace(
+        'class="ring-arc"',
+        'stroke="url(#ringGradient)" stroke-width="14.5" stroke-linecap="round" filter="url(#trueBloom)"'
+      ).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '));
+      const emissionSource='data:image/svg+xml,'+encodeURIComponent(ringSvg.replace(
+        'class="ring-arc"',
+        'stroke="#fff0f6" stroke-width="5" stroke-linecap="round" filter="url(#trueBloom)"'
+      ).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '));
+      const ringLights='<img class="ring-light ring-aura" src="'+glowSource+'" alt="" aria-hidden="true">'+
+        '<img class="ring-light ring-emission" src="'+emissionSource+'" alt="" aria-hidden="true">';
       return '<section class="screen screen-home">'+header()+
         '<div class="home-body"><div class="home-date">'+safeText(fmtDate)+'</div>'+
         '<div class="home-center"><div class="quiet-landscape" aria-hidden="true"></div>'+
-        '<div class="ring-stage" aria-label="'+m.yes+' bewusst gewonnene Tage">'+ringSvg+
+        '<div class="ring-stage" aria-label="'+m.yes+' bewusst gewonnene Tage">'+ringSvg+ringLights+
           '<div class="metric-number">'+m.yes+'</div></div>'+
         '<div class="ring-copy"><div class="metric-label">bewusst gewonnene Tage</div><div class="metric-note">Jeder einzelne zählt.</div></div></div>'+
         '<div class="home-actions"><div class="habit-compact"><div class="habit-glyph" aria-hidden="true"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 22V11M13 17C6 18 3 13 4 6c6-1 10 3 9 11ZM13 15c0-7 4-10 10-10 1 7-3 11-10 10Z"/></svg></div>'+

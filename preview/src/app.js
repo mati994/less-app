@@ -1,7 +1,7 @@
 import {icons,dateKey,safeText} from './config.js';
 import {demoData,load,persist,calculateMetrics} from './storage.js';
-import {home,history,more,setupHtml} from './views.js?v=20261116-pearl2';
-import {ringArcLength,animateRingSvgProgress,finishIntroAnimation,playPearlLight,stopPearlLight} from './ring.js?v=20261116-pearl2';
+import {home,history,more,setupHtml} from './views.js?v=20261116-pearl21';
+import {ringArcLength,animateRingSvgProgress,finishIntroAnimation,playPearlLight,stopPearlLight} from './ring.js?v=20261116-pearl21';
 
 let data=load(), tab='home', modal=null, toastTimer=null, pendingDate=null, celebratePending=false, suppressAutoRing=false;
     const root=document.getElementById('app'), modalRoot=document.getElementById('modal-root');

@@ -17,9 +17,10 @@ const vm = require('node:vm');
   let frame, reduced = false, blockWrite = false, effect, activeStage, modal;
   const createStage = () => {
     const number = {textContent:''};
+    const classes = new Set();
     const values = {};
     const ring = {setAttribute:(key,value)=>values[key]=value, getAttribute:key=>values[key]};
-    return {isConnected:true, ring, number, getBoundingClientRect:()=>({left:65,top:145,width:260,height:260}),
+    return {isConnected:true, ring, number, classes, classList:{add:name=>classes.add(name),remove:name=>classes.delete(name)}, getBoundingClientRect:()=>({left:65,top:145,width:260,height:260}),
       querySelector:sel=>sel.startsWith('.ring-arc') ? ring : number};
   };
   const root = {
@@ -49,7 +50,7 @@ const vm = require('node:vm');
       getElementById:id=>id==='app'?root:id==='modal-root'?{set innerHTML(value){modal=value}}:null,
       querySelector:()=>null,body:{append(){}},
       addEventListener:(name,fn)=>{handlers[name]=fn;addEventListener(name,fn)},
-      createElement:()=>({addEventListener:(name,fn)=>{if(name==='animationend')handlers.effectEnd=()=>fn({animationName:'pearlEdgeFade'})},style:{setProperty(){}},setAttribute(){},
+      createElement:()=>({addEventListener:(name,fn)=>{if(name==='animationend')handlers.effectEnd=()=>fn({animationName:'pearlEdgeFade'})},style:{values:{},setProperty(name,value){this.values[name]=value}},setAttribute(){},
         lastElementChild:{addEventListener:(name,fn)=>{if(name==='animationend')handlers.effectEnd=fn}},
         remove(){if(effect===this)effect=undefined}})
     },
@@ -72,6 +73,10 @@ const vm = require('node:vm');
   click({quickCheck:'yes'});
   assert.equal(data().checkins[today],'yes');
   assert.ok(effect);
+  assert.ok(activeStage.classes.has('pearl-emitting'));
+  const startRadius=Number(effect.style.values['--pearl-start-scale'])*192*.68;
+  assert.ok(Math.abs(startRadius-260*130/400)<.001);
+  assert.equal(effect.style.values['--pearl-launch-delay'],'130ms');
   frame(760);
   assert.equal(activeStage.number.textContent,'2');
   const first=effect;
@@ -84,6 +89,7 @@ const vm = require('node:vm');
   assert.equal(activeStage.number.textContent,'2');
   handlers.effectEnd();
   assert.equal(effect,undefined);
+  assert.ok(!activeStage.classes.has('pearl-emitting'));
   click({quickCheck:'no'});
   assert.equal(effect,undefined);
   assert.equal(data().checkins[today],'no');

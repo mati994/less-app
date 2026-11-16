@@ -1,6 +1,6 @@
-# less. – Pearl Light 2.0 testen
+# less. – Pearl Light 2.1 testen
 
-Der Teststand liegt im Branch `codex/pearl-light-iphone`. Die vorhandene GitHub-Pages-Adresse zeigt den veröffentlichten Stand von `main`. Der Branch stellt allein keine neue Safari-Testadresse bereit.
+Die private [HTTPS-Testversion](https://less-pearl-light-matis.ein-schmuh.chatgpt.site/) wird aus dem Branch `codex/pearl-light-iphone` aktualisiert. In Safari öffnen, gegebenenfalls mit dem eigenen ChatGPT-Konto anmelden und neu laden. Der Seitentitel nennt `Pearl Light 2.1 Test`. Die lokale Alternative folgt unten.
 
 ## Start unter Windows
 
@@ -21,7 +21,7 @@ Der Server liefert den Testordner aus. Nutze für wiederholte Tests dieselbe Adr
 
 ## Testablauf auf dem iPhone
 
-- **Heute geschafft** antippen. Erwartet werden eine weiche Woge in Lavendel, Rosé und Pfirsich sowie ein sehr dünner, nach innen auslaufender Rand. Der gesamte Effekt endet nach etwa 2,35 Sekunden.
+- **Heute geschafft** antippen. Der Ring soll schon im Ruhezustand dezent schimmern. Nach dem Tippen leuchtet seine offene Kontur kurz auf. Von dort startet eine weiche Woge in Lavendel, Rosé und Pfirsich sowie ein sehr dünner, nach innen auslaufender Rand. Der gesamte Effekt endet nach etwa 2,35 Sekunden.
 - Schnell mehrfach antippen. Ein Effekt wird neu gestartet, der Tag wird genau einmal gezählt.
 - Während der Woge **Heute war es schwer** antippen. Die positive Woge endet, der negative Check-in wird gespeichert.
 - Zum Verlauf wechseln, einen Tag ändern und das Ergebnis über **Weiter**, das X oder den Hintergrund schließen. Ein gespeicherter positiver Eintrag löst die Woge aus. Ein negativer Eintrag oder das Entfernen eines Eintrags löst sie nicht aus.
@@ -35,13 +35,13 @@ Auf dem Rechner unterstützt `http://localhost:8000/` den Service Worker. Nach e
 
 Die WLAN-Adresse mit `http://<IPv4-Adresse>` eignet sich auf dem iPhone für die Animation und lokale Speicherung. Der Service Worker braucht dort HTTPS. Für den vollständigen iPhone-Offline- und Homescreen-Test ist eine separat gehostete HTTPS-Testseite erforderlich.
 
-GitHub Pages hat für dieses Repository eine veröffentlichte Site mit konfigurierter Quelle. Ein weiterer Branch erzeugt keine zusätzliche Test-Site. Eine separate Test-Site über einen Hostingdienst oder ein eigenes Pages-Repository müsste eigens eingerichtet werden. Dafür wurde noch keine Freigabe eingeholt und kein Deployment vorgenommen.
+GitHub Pages hat für dieses Repository eine veröffentlichte Site mit konfigurierter Quelle. Ein weiterer Branch erzeugt keine zusätzliche Test-Site. Die separat eingerichtete private ChatGPT-Site dient dem HTTPS-Test. Ihre Freigabe durch Matis liegt vor. Die Live-Pages-Konfiguration wird für diese Tests nicht bearbeitet.
 
 ## Daten und Cache
 
 - Testdaten verwenden `less.preview.v1` und bleiben im Browser des jeweiligen Test-Ursprungs.
 - Die Live-App verwendet `less.prototype.v1`. Dieses Format und der Live-Code wurden in dieser Phase nicht bearbeitet.
-- Der Service Worker ist relativ zum Testordner registriert und verwendet `less-preview-2026-11-16-pearl2`. Offline-Antworten werden ausschließlich aus diesem Cache gelesen.
+- Der Service Worker ist relativ zum Testordner registriert und verwendet `less-preview-2026-11-16-pearl21`. Offline-Antworten werden ausschließlich aus diesem Cache gelesen.
 - Ein Update entfernt alte Vorschau-Caches. Check-ins liegen separat in Local Storage und werden dabei nicht gelöscht.
 
 ## Wiederholbare Codeprüfungen
