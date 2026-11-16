@@ -1,27 +1,65 @@
 // Der leuchtende Fortschrittsring: Geometrie, Check-in-Animation und Intro.
 export function ringArcLength(n){return 2*Math.PI*130*(1-(.24+.42*(1-Math.exp(-n/45))))}
 
-export function playPearlLight(root){
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+const pearlAnimations=new WeakMap();
 
+export function stopPearlLight(root){
+  pearlAnimations.get(root)?.();
+}
+
+export function playPearlLight(root){
+  stopPearlLight(root);
+  const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  if(motion.matches||document.hidden||!root.isConnected)return;
+
+  // Read geometry once; every light layer then moves through transform/opacity.
   const bounds=root.getBoundingClientRect();
+  if(!bounds.width||!bounds.height)return;
   const ring=root.querySelector('.ring-stage')?.getBoundingClientRect();
   const x=ring ? ring.left+ring.width/2-bounds.left : bounds.width/2;
   const y=ring ? ring.top+ring.height/2-bounds.top : bounds.height*.42;
   const radius=Math.hypot(Math.max(x,bounds.width-x),Math.max(y,bounds.height-y));
-
-  root.querySelector('.pearl-light')?.remove();
   const effect=document.createElement('div');
   effect.className='pearl-light';
   effect.setAttribute('aria-hidden','true');
-  effect.innerHTML='<div class="pearl-wave"></div><div class="pearl-rim"></div>';
+  effect.innerHTML='<div class="pearl-wave"></div><div class="pearl-depth"></div>'+
+    '<div class="pearl-edge pearl-edge-left"></div><div class="pearl-edge pearl-edge-right"></div>'+
+    '<div class="pearl-edge pearl-edge-top"></div><div class="pearl-edge pearl-edge-bottom"></div>';
   effect.style.setProperty('--pearl-x',x+'px');
   effect.style.setProperty('--pearl-y',y+'px');
-  // The crest sits at 60% of the sprite radius and reaches the farthest corner.
-  effect.style.setProperty('--pearl-scale',String(radius/(128*.6)));
-  const rim=effect.lastElementChild;
-  rim.addEventListener('animationend',()=>effect.remove(),{once:true});
-  rim.addEventListener('animationcancel',()=>effect.remove(),{once:true});
+  effect.style.setProperty('--pearl-scale',String(radius/(192*.68)));
+  effect.style.setProperty('--pearl-duration','2350ms');
+
+  // Approximate the crest's cubic ease-out arrival at each edge. The small
+  // overlap lets the broad wave brighten the edge before its centre arrives.
+  const distances={left:x,right:bounds.width-x,top:y,bottom:bounds.height-y};
+  for(const [side,distance] of Object.entries(distances)){
+    const fraction=Math.min(1,Math.max(0,distance/radius));
+    const arrival=1950*(1-Math.cbrt(1-fraction));
+    effect.style.setProperty('--pearl-'+side+'-delay',Math.max(0,arrival-70)+'ms');
+  }
+
+  let timeout;
+  const stop=()=>{
+    if(pearlAnimations.get(root)!==stop)return;
+    clearTimeout(timeout);
+    effect.remove();
+    motion.removeEventListener('change',stop);
+    document.removeEventListener('visibilitychange',stop);
+    window.removeEventListener('pagehide',stop);
+    window.removeEventListener('resize',stop);
+    pearlAnimations.delete(root);
+  };
+  effect.addEventListener('animationend',event=>{
+    if(event.animationName==='pearlEdgeFade')stop();
+  });
+  motion.addEventListener('change',stop);
+  document.addEventListener('visibilitychange',stop);
+  window.addEventListener('pagehide',stop);
+  window.addEventListener('resize',stop);
+  pearlAnimations.set(root,stop);
+  // Also clean up when CSS animations are interrupted or animationend is lost.
+  timeout=setTimeout(stop,2450);
   root.append(effect);
 }
 

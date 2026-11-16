@@ -1,16 +1,17 @@
 import {icons,dateKey,safeText} from './config.js';
 import {demoData,load,persist,calculateMetrics} from './storage.js';
-import {home,history,more,setupHtml} from './views.js?v=20261116-pearl1';
-import {ringArcLength,animateRingSvgProgress,finishIntroAnimation,playPearlLight} from './ring.js?v=20261116-pearl1';
+import {home,history,more,setupHtml} from './views.js?v=20261116-pearl2';
+import {ringArcLength,animateRingSvgProgress,finishIntroAnimation,playPearlLight,stopPearlLight} from './ring.js?v=20261116-pearl2';
 
 let data=load(), tab='home', modal=null, toastTimer=null, pendingDate=null, celebratePending=false, suppressAutoRing=false;
     const root=document.getElementById('app'), modalRoot=document.getElementById('modal-root');
 function save(){if(!persist(data))toast('Speichern ist in diesem Browser nicht möglich.')}
 function metrics(){return calculateMetrics(data)}
 let formMode='abstain';
-function setup(){tab='setup';root.innerHTML=setupHtml()}
+function setup(){stopPearlLight(root);tab='setup';root.innerHTML=setupHtml()}
 
 function render(){
+      stopPearlLight(root);
       const oldRing=root.querySelector('.orbit .ring-arc');
       const previousArc=oldRing?Number(oldRing.getAttribute('data-arc')):null;
       if(tab==='setup'){setup();return}
@@ -85,7 +86,7 @@ function render(){
         render();
         if(value==='clear')toast('Eintrag entfernt');
         else {
-          celebratePending=value==='yes'&&previous!=='yes';
+          celebratePending=value==='yes';
           showResult(value);
         }
         return;

@@ -18,52 +18,73 @@
   background:radial-gradient(circle,rgba(196,148,225,.18),rgba(129,88,171,.08) 42%,transparent 70%);
 }
 
+/* Two small, pre-painted textures. Only uniform scale and opacity animate. */
 .pearl-light{
   position:absolute;
   z-index:7;
   inset:0;
   overflow:hidden;
   pointer-events:none;
+  contain:layout paint;
 }
 
-/* Reuse the painted gradient while the wave expands. */
-.pearl-wave{
+.pearl-wave,.pearl-depth{
   position:absolute;
-  width:256px;
-  height:256px;
+  width:384px;
+  height:384px;
   left:var(--pearl-x);
   top:var(--pearl-y);
-  margin:-128px 0 0 -128px;
-  background:
-    radial-gradient(ellipse 44% 38% at 30% 34%,rgba(255,229,215,.39),transparent 77%),
-    radial-gradient(ellipse 42% 43% at 69% 57%,rgba(223,193,255,.35),transparent 81%),
-    radial-gradient(circle closest-side,transparent 24%,rgba(190,150,238,.07) 37%,rgba(232,186,245,.27) 52%,rgba(255,238,245,.44) 60%,rgba(223,193,255,.19) 66%,transparent 83%);
+  margin:-192px 0 0 -192px;
+  transform-origin:center;
   will-change:transform,opacity;
-  animation:pearlSpread 1.76s cubic-bezier(.22,.55,.36,1) both;
 }
 
-.pearl-rim{
-  position:absolute;
-  inset:0;
+.pearl-wave{
   background:
-    linear-gradient(90deg,#ffe5d7,rgba(247,209,234,.2) 52%,#dfc1ff) top / 100% 1px,
-    linear-gradient(90deg,#ffe5d7,rgba(247,209,234,.2) 52%,#dfc1ff) bottom / 100% 1px,
-    linear-gradient(#ffe5d7,rgba(255,229,215,.44),#ffe5d7) left / 1px 100%,
-    linear-gradient(#dfc1ff,rgba(223,193,255,.44),#dfc1ff) right / 1px 100%;
-  background-repeat:no-repeat;
+    radial-gradient(ellipse 37% 28% at 28% 38%,rgba(255,227,208,.44),rgba(252,203,219,.14) 45%,transparent 80%),
+    radial-gradient(ellipse 32% 42% at 70% 54%,rgba(213,191,255,.39),rgba(228,190,242,.12) 46%,transparent 80%),
+    radial-gradient(ellipse 40% 24% at 49% 70%,rgba(250,209,231,.22),transparent 75%),
+    radial-gradient(circle closest-side,transparent 22%,rgba(218,185,241,.04) 37%,rgba(240,203,229,.17) 53%,rgba(255,239,230,.24) 66%,rgba(226,202,254,.11) 76%,transparent 96%);
+  animation:pearlSpread 1950ms cubic-bezier(.215,.61,.355,1) both,
+            pearlWaveFade 1950ms linear both;
 }
 
-.pearl-light::after{
-  content:"";
+.pearl-depth{
+  background:
+    radial-gradient(ellipse 38% 29% at 62% 33%,rgba(255,240,226,.28),rgba(247,203,224,.09) 47%,transparent 82%),
+    radial-gradient(ellipse 31% 36% at 34% 65%,rgba(210,182,252,.25),rgba(237,187,225,.08) 46%,transparent 83%),
+    radial-gradient(circle closest-side,transparent 28%,rgba(233,188,221,.09) 46%,rgba(251,222,233,.15) 61%,transparent 91%);
+  animation:pearlSpread 2160ms 120ms cubic-bezier(.215,.61,.355,1) both,
+            pearlDepthFade 2160ms 120ms linear both;
+}
+
+/* Narrow edge surfaces retain a bright hairline with a 22px inward falloff. */
+.pearl-edge{
   position:absolute;
-  inset:0;
-  box-shadow:inset 6px 0 16px -10px rgba(255,229,215,.68),
-             inset -6px 0 16px -10px rgba(223,193,255,.72);
-}
-
-.pearl-rim,.pearl-light::after{
   will-change:opacity;
-  animation:pearlRim 2.15s ease-in-out both;
+  animation:pearlEdgeFade calc(var(--pearl-duration) - var(--edge-delay)) var(--edge-delay) ease-in-out both;
+}
+.pearl-edge-left,.pearl-edge-right{top:0;bottom:0;width:22px}
+.pearl-edge-top,.pearl-edge-bottom{left:0;right:0;height:22px}
+.pearl-edge-left{
+  left:0;
+  --edge-delay:var(--pearl-left-delay);
+  background:linear-gradient(to right,rgba(255,239,226,.98) 0,rgba(255,229,215,.91) .8px,rgba(255,220,206,.31) 2px,rgba(248,197,218,.12) 7px,transparent 22px);
+}
+.pearl-edge-right{
+  right:0;
+  --edge-delay:var(--pearl-right-delay);
+  background:linear-gradient(to left,rgba(244,234,255,.98) 0,rgba(223,193,255,.91) .8px,rgba(217,185,255,.31) 2px,rgba(212,177,247,.12) 7px,transparent 22px);
+}
+.pearl-edge-top{
+  top:0;
+  --edge-delay:var(--pearl-top-delay);
+  background:linear-gradient(to bottom,rgba(255,239,244,.98) 0,rgba(247,210,231,.91) .8px,rgba(246,204,224,.28) 2px,rgba(239,189,218,.10) 7px,transparent 22px);
+}
+.pearl-edge-bottom{
+  bottom:0;
+  --edge-delay:var(--pearl-bottom-delay);
+  background:linear-gradient(to top,rgba(255,238,235,.98) 0,rgba(243,210,229,.91) .8px,rgba(232,194,240,.28) 2px,rgba(218,182,244,.10) 7px,transparent 22px);
 }
 
 @keyframes lessBreathe{
@@ -71,15 +92,26 @@
   50%{transform:scale(1.005);opacity:1}
 }
 @keyframes pearlSpread{
-  0%{transform:scale(.36);opacity:0}
-  23%{opacity:.78}
-  57%{opacity:.48}
-  100%{transform:scale(var(--pearl-scale));opacity:0}
+  from{transform:scale(.12)}
+  to{transform:scale(var(--pearl-scale))}
 }
-@keyframes pearlRim{
-  0%,10%{opacity:0}
-  38%{opacity:.86}
-  58%{opacity:.52}
+@keyframes pearlWaveFade{
+  0%{opacity:0}
+  16%{opacity:.76}
+  43%{opacity:.66}
+  72%{opacity:.32}
+  100%{opacity:0}
+}
+@keyframes pearlDepthFade{
+  0%{opacity:0}
+  22%{opacity:.63}
+  52%{opacity:.47}
+  100%{opacity:0}
+}
+@keyframes pearlEdgeFade{
+  0%{opacity:0}
+  22%{opacity:.94}
+  46%{opacity:.64}
   100%{opacity:0}
 }
 

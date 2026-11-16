@@ -1,5 +1,5 @@
 import {icons, safeText, dateKey, shifted, weekdayShort} from './config.js';
-import {ringArcLength} from './ring.js?v=20261116-pearl1';
+import {ringArcLength} from './ring.js?v=20261116-pearl2';
 
 export function logo(){return `<div class="brand"><svg class="brandmark" viewBox="0 0 36 36" fill="none"><defs><linearGradient id="markgrad" x1="0" y1="0" x2="36" y2="36"><stop stop-color="#e8cfca"/><stop offset="1" stop-color="#aa90dd"/></linearGradient></defs><circle cx="18" cy="18" r="13" stroke="url(#markgrad)" stroke-width="3.2" stroke-dasharray="63 19" transform="rotate(-65 18 18)"/></svg>less.</div>`}
     export function header(){return `<header class="brandrow">${logo()}<button class="iconbutton" aria-label="Einstellungen" data-tab="more">${icons.settings}</button></header>`}

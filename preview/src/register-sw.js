@@ -1,3 +1,6 @@
-if ('serviceWorker' in navigator && location.protocol === 'https:') {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
-    }
+// HTTPS and loopback development origins support service workers.
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  });
+}
